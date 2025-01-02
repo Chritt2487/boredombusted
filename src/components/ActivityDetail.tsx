@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import TutorialsSection from "./sections/TutorialsSection";
 import EquipmentSection from "./sections/EquipmentSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 interface ActivityDetailProps {
   activity: {
@@ -72,8 +73,30 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
     fetchDetailedInfo();
   }, [activity.name, toast]);
 
-  if (loading || !detailedInfo) {
-    return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-[#9b87f5]" />
+        <p className="text-gray-600">Loading activity details...</p>
+      </div>
+    );
+  }
+
+  if (!detailedInfo) {
+    return (
+      <div className="space-y-4">
+        <Button onClick={onBack} variant="ghost" className="mb-4">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Results
+        </Button>
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-center text-gray-600">
+              Could not load activity details. Please try again later.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const boldKeywords = (text: string) => {
@@ -147,85 +170,99 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
       </Card>
 
       {/* Quick Benefits Section */}
-      <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="text-[#7E69AB]">Why You'll Love It</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <ul className="list-disc list-inside space-y-2">
-            {detailedInfo.benefits.funFacts.map((fact, index) => (
-              <li key={index} className="text-gray-700">
-                <div dangerouslySetInnerHTML={{ __html: boldKeywords(fact) }} />
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
-      {/* Getting Started Section */}
-      <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="text-[#7E69AB]">Getting Started</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <h3 className="font-semibold text-[#7E69AB]">Step-by-Step Guide</h3>
-            <ol className="list-decimal list-inside space-y-2">
-              {detailedInfo.gettingStarted.steps.map((step, index) => (
-                <li key={index} className="text-gray-700">
-                  <div dangerouslySetInnerHTML={{ __html: boldKeywords(step) }} />
-                </li>
-              ))}
-            </ol>
-          </div>
-          <div className="space-y-4">
-            <h3 className="font-semibold text-[#7E69AB]">Tips for Beginners</h3>
+      {detailedInfo.benefits?.funFacts && (
+        <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-[#7E69AB]">Why You'll Love It</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <ul className="list-disc list-inside space-y-2">
-              {detailedInfo.gettingStarted.beginnerTips.map((tip, index) => (
+              {detailedInfo.benefits.funFacts.map((fact, index) => (
                 <li key={index} className="text-gray-700">
-                  <div dangerouslySetInnerHTML={{ __html: boldKeywords(tip) }} />
+                  <div dangerouslySetInnerHTML={{ __html: boldKeywords(fact) }} />
                 </li>
               ))}
             </ul>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Getting Started Section */}
+      {detailedInfo.gettingStarted && (
+        <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-[#7E69AB]">Getting Started</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {detailedInfo.gettingStarted.steps && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-[#7E69AB]">Step-by-Step Guide</h3>
+                <ol className="list-decimal list-inside space-y-2">
+                  {detailedInfo.gettingStarted.steps.map((step, index) => (
+                    <li key={index} className="text-gray-700">
+                      <div dangerouslySetInnerHTML={{ __html: boldKeywords(step) }} />
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+            {detailedInfo.gettingStarted.beginnerTips && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-[#7E69AB]">Tips for Beginners</h3>
+                <ul className="list-disc list-inside space-y-2">
+                  {detailedInfo.gettingStarted.beginnerTips.map((tip, index) => (
+                    <li key={index} className="text-gray-700">
+                      <div dangerouslySetInnerHTML={{ __html: boldKeywords(tip) }} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Equipment Section */}
-      <EquipmentSection equipment={detailedInfo.equipment} />
+      {detailedInfo.equipment && <EquipmentSection equipment={detailedInfo.equipment} />}
 
       {/* Benefits Section */}
-      <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center text-[#7E69AB]">
-            <Brain className="mr-2" /> Benefits and Skills
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h3 className="font-semibold text-[#7E69AB]">Skills Developed</h3>
-              <ul className="list-disc list-inside space-y-2">
-                {detailedInfo.benefits.skills.map((skill, index) => (
-                  <li key={index} className="text-gray-700">
-                    <div dangerouslySetInnerHTML={{ __html: boldKeywords(skill) }} />
-                  </li>
-                ))}
-              </ul>
+      {(detailedInfo.benefits?.skills || detailedInfo.benefits?.health) && (
+        <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center text-[#7E69AB]">
+              <Brain className="mr-2" /> Benefits and Skills
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              {detailedInfo.benefits.skills && (
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-[#7E69AB]">Skills Developed</h3>
+                  <ul className="list-disc list-inside space-y-2">
+                    {detailedInfo.benefits.skills.map((skill, index) => (
+                      <li key={index} className="text-gray-700">
+                        <div dangerouslySetInnerHTML={{ __html: boldKeywords(skill) }} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {detailedInfo.benefits.health && (
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-[#7E69AB]">Health Benefits</h3>
+                  <ul className="list-disc list-inside space-y-2">
+                    {detailedInfo.benefits.health.map((benefit, index) => (
+                      <li key={index} className="text-gray-700">
+                        <div dangerouslySetInnerHTML={{ __html: boldKeywords(benefit) }} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-            <div className="space-y-4">
-              <h3 className="font-semibold text-[#7E69AB]">Health Benefits</h3>
-              <ul className="list-disc list-inside space-y-2">
-                {detailedInfo.benefits.health.map((benefit, index) => (
-                  <li key={index} className="text-gray-700">
-                    <div dangerouslySetInnerHTML={{ __html: boldKeywords(benefit) }} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Learning Resources Section */}
       <TutorialsSection activityName={activity.name} />
