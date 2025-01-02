@@ -24,7 +24,7 @@ interface Activity {
   difficulty?: string;
   timeCommitment?: string;
   costEstimate?: string;
-  benefits?: string[];
+  benefits: string[]; // Changed from optional to required
 }
 
 export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
@@ -43,7 +43,12 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
         if (error) throw error;
 
         console.log("Received recommendations:", data);
-        setActivities(data.activities);
+        // Ensure benefits array exists for each activity
+        const activitiesWithBenefits = data.activities.map((activity: any) => ({
+          ...activity,
+          benefits: activity.benefits || [] // Provide empty array as fallback
+        }));
+        setActivities(activitiesWithBenefits);
       } catch (error) {
         console.error("Error fetching recommendations:", error);
         toast({
@@ -64,6 +69,7 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
       name: alternative.name,
       description: alternative.description,
       imageUrl: "/placeholder.svg",
+      benefits: [], // Add empty benefits array for alternatives
     };
     setSelectedActivity(newActivity);
   };
