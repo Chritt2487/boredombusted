@@ -11,8 +11,11 @@ const corsHeaders = {
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
 serve(async (req) => {
+  console.log("Request received:", req.method);
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log("Handling CORS preflight request");
     return new Response(null, { 
       headers: corsHeaders,
       status: 204,
@@ -20,8 +23,6 @@ serve(async (req) => {
   }
 
   try {
-    console.log("Received request:", req.method);
-    
     if (!openAIApiKey) {
       throw new Error('OpenAI API key is not configured');
     }
@@ -84,7 +85,7 @@ serve(async (req) => {
     if (!gptResponse.ok) {
       const errorText = await gptResponse.text();
       console.error("OpenAI API error:", errorText);
-      throw new Error('Failed to generate detailed information from OpenAI');
+      throw new Error(`OpenAI API error: ${errorText}`);
     }
 
     const gptData = await gptResponse.json();
@@ -93,6 +94,7 @@ serve(async (req) => {
     let detailedInfo;
     try {
       detailedInfo = JSON.parse(gptData.choices[0].message.content);
+      console.log("Successfully parsed OpenAI response");
       
       // Add affiliate links to equipment
       detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
@@ -105,6 +107,7 @@ serve(async (req) => {
       throw new Error('Invalid response format from OpenAI');
     }
 
+    console.log("Sending successful response");
     return new Response(
       JSON.stringify(detailedInfo),
       { headers: corsHeaders }
@@ -112,14 +115,17 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in get-activity-details:', error);
+    const errorResponse = {
+      error: 'Failed to generate detailed information',
+      details: error.message,
+      timestamp: new Date().toISOString()
+    };
+    console.error('Sending error response:', errorResponse);
+    
     return new Response(
-      JSON.stringify({ 
-        error: 'Failed to generate detailed information',
-        details: error.message,
-        timestamp: new Date().toISOString()
-      }),
+      JSON.stringify(errorResponse),
       { 
-        status: 500, 
+        status: 500,
         headers: corsHeaders
       }
     );
