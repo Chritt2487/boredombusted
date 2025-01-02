@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ActivityDetail from "./ActivityDetail";
+import ActivityCard from "./ActivityCard";
 
 interface ResultsDisplayProps {
   answers: {
@@ -37,9 +36,7 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
           body: { answers }
         });
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         console.log("Received recommendations:", data);
         setActivities(data.activities);
@@ -58,6 +55,17 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
     fetchRecommendations();
   }, [answers, toast]);
 
+  const handleSelectAlternative = (alternative: { name: string; description: string }) => {
+    // Create a new activity object from the alternative
+    const newActivity: Activity = {
+      name: alternative.name,
+      description: alternative.description,
+      imageUrl: "/placeholder.svg", // Use placeholder image
+      tips: [], // Empty tips array as we'll get detailed info from the API
+    };
+    setSelectedActivity(newActivity);
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
@@ -70,8 +78,9 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
   if (selectedActivity) {
     return (
       <ActivityDetail 
-        activity={selectedActivity} 
-        onBack={() => setSelectedActivity(null)} 
+        activity={selectedActivity}
+        onBack={() => setSelectedActivity(null)}
+        onSelectAlternative={handleSelectAlternative}
       />
     );
   }
@@ -85,35 +94,11 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {activities.map((activity, index) => (
-          <Card key={index} className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow duration-200">
-            <CardHeader>
-              <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
-                <img
-                  src={activity.imageUrl}
-                  alt={activity.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <CardTitle className="text-xl text-[#7E69AB]">{activity.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-600">{activity.description}</p>
-              <div className="space-y-2">
-                <h4 className="font-semibold text-[#7E69AB]">Quick Tips:</h4>
-                <ul className="list-disc list-inside space-y-1 text-gray-600">
-                  {activity.tips.map((tip, tipIndex) => (
-                    <li key={tipIndex}>{tip}</li>
-                  ))}
-                </ul>
-              </div>
-              <Button 
-                className="w-full bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
-                onClick={() => setSelectedActivity(activity)}
-              >
-                Learn More
-              </Button>
-            </CardContent>
-          </Card>
+          <ActivityCard
+            key={index}
+            activity={activity}
+            onSelect={setSelectedActivity}
+          />
         ))}
       </div>
     </div>

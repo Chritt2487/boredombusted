@@ -9,7 +9,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -18,7 +17,6 @@ serve(async (req) => {
     const { answers } = await req.json();
     console.log('Received answers:', answers);
     
-    // Create a detailed prompt based on user answers
     const prompt = `Based on these preferences:
     - Main interest: ${answers.initialChoice}
     - Environment: ${answers.environment}
@@ -31,7 +29,6 @@ serve(async (req) => {
     1. A name
     2. A detailed description (2-3 sentences)
     3. 3 quick tips for getting started
-    4. A detailed image prompt for DALL-E to generate a representative image
 
     Format the response as a JSON array with this structure:
     {
@@ -39,13 +36,11 @@ serve(async (req) => {
         {
           "name": "Activity Name",
           "description": "Activity description",
-          "tips": ["tip1", "tip2", "tip3"],
-          "imagePrompt": "Detailed image generation prompt"
+          "tips": ["tip1", "tip2", "tip3"]
         }
       ]
     }`;
 
-    // Get activity recommendations from GPT
     const gptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -67,8 +62,6 @@ serve(async (req) => {
     });
 
     if (!gptResponse.ok) {
-      const error = await gptResponse.text();
-      console.error('OpenAI API error:', error);
       throw new Error('Failed to generate recommendations from OpenAI');
     }
 
@@ -81,45 +74,11 @@ serve(async (req) => {
 
     const recommendations = JSON.parse(gptData.choices[0].message.content);
 
-    // Generate images for each activity
-    const activitiesWithImages = await Promise.all(
-      recommendations.activities.map(async (activity: any) => {
-        try {
-          const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${openAIApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: "dall-e-3",
-              prompt: activity.imagePrompt,
-              n: 1,
-              size: "1024x1024",
-            }),
-          });
-
-          if (!imageResponse.ok) {
-            const error = await imageResponse.text();
-            console.error('DALL-E API error:', error);
-            throw new Error('Failed to generate image');
-          }
-
-          const imageData = await imageResponse.json();
-          return {
-            ...activity,
-            imageUrl: imageData.data[0].url,
-          };
-        } catch (error) {
-          console.error('Error generating image for activity:', error);
-          // Return activity with a placeholder image if image generation fails
-          return {
-            ...activity,
-            imageUrl: 'https://via.placeholder.com/1024x1024?text=Image+Generation+Failed',
-          };
-        }
-      })
-    );
+    // Add placeholder images
+    const activitiesWithImages = recommendations.activities.map((activity: any) => ({
+      ...activity,
+      imageUrl: '/placeholder.svg',
+    }));
 
     return new Response(
       JSON.stringify({ activities: activitiesWithImages }),
