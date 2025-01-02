@@ -4,6 +4,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -11,7 +12,10 @@ const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      headers: corsHeaders,
+      status: 204,
+    });
   }
 
   try {
@@ -77,7 +81,8 @@ serve(async (req) => {
     });
 
     if (!gptResponse.ok) {
-      console.error("OpenAI API error:", await gptResponse.text());
+      const errorText = await gptResponse.text();
+      console.error("OpenAI API error:", errorText);
       throw new Error('Failed to generate detailed information from OpenAI');
     }
 
@@ -113,7 +118,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to generate detailed information',
-        details: error.message 
+        details: error.message,
+        timestamp: new Date().toISOString()
       }),
       { 
         status: 500, 
