@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Activity } from "@/types/activity";
+import { useActivityDetails } from "@/hooks/useActivityDetails";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import OverviewSection from "./sections/OverviewSection";
 import TutorialsSection from "./sections/TutorialsSection";
 import EquipmentSection from "./sections/EquipmentSection";
@@ -12,99 +12,16 @@ import BenefitsSection from "./sections/BenefitsSection";
 import CommunitySection from "./sections/CommunitySection";
 
 interface ActivityDetailProps {
-  activity: {
-    name: string;
-    description: string;
-    imageUrl: string;
-    tips: string[];
-  };
+  activity: Activity;
   onBack: () => void;
   onSelectAlternative: (alternative: { name: string; description: string }) => void;
 }
 
-interface DetailedActivity {
-  equipment: {
-    name: string;
-    description: string;
-    affiliateUrl: string;
-    price: string;
-    category: 'required' | 'recommended' | 'professional';
-  }[];
-  locations?: {
-    name: string;
-    description: string;
-    address: string;
-    rating: number;
-  }[];
-  alternatives: {
-    name: string;
-    description: string;
-  }[];
-  difficulty: string;
-  timeCommitment: string;
-  costEstimate: string;
-  benefits: {
-    skills: string[];
-    health: string[];
-    social: string[];
-  };
-  community: {
-    groups: {
-      name: string;
-      description: string;
-      link: string;
-    }[];
-    events: {
-      name: string;
-      description: string;
-      date?: string;
-    }[];
-    hashtags: string[];
-  };
-}
-
 export default function ActivityDetail({ activity, onBack, onSelectAlternative }: ActivityDetailProps) {
-  const [detailedInfo, setDetailedInfo] = useState<DetailedActivity | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchDetailedInfo = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('get-activity-details', {
-          body: { activityName: activity.name }
-        });
-
-        if (error) throw error;
-        
-        // Add default category if not present
-        const processedData = {
-          ...data,
-          equipment: data.equipment.map((item: any) => ({
-            ...item,
-            category: item.category || 'recommended' // Default to 'recommended' if category is missing
-          }))
-        };
-        
-        console.log("Received detailed info:", processedData);
-        setDetailedInfo(processedData);
-      } catch (error) {
-        console.error("Error fetching detailed info:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load detailed information. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDetailedInfo();
-  }, [activity.name, toast]);
+  const { detailedInfo, loading } = useActivityDetails(activity);
 
   if (loading || !detailedInfo) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   return (
