@@ -21,8 +21,10 @@ interface Activity {
   name: string;
   description: string;
   imageUrl: string;
-  tips: string[];
-  benefits: string[]; // Added this field
+  difficulty?: string;
+  timeCommitment?: string;
+  costEstimate?: string;
+  benefits?: string[];
 }
 
 export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
@@ -58,13 +60,10 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
   }, [answers, toast]);
 
   const handleSelectAlternative = (alternative: { name: string; description: string }) => {
-    // Create a new activity object from the alternative
     const newActivity: Activity = {
       name: alternative.name,
       description: alternative.description,
       imageUrl: "/placeholder.svg",
-      tips: [],
-      benefits: [], // Added empty benefits array
     };
     setSelectedActivity(newActivity);
   };
