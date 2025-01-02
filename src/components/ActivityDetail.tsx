@@ -1,59 +1,118 @@
-import React from "react";
-import { Activity } from "./ResultsDisplay";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import TutorialsSection from "./sections/TutorialsSection";
+import EquipmentSection from "./sections/EquipmentSection";
+import LocationsSection from "./sections/LocationsSection";
+import AlternativesSection from "./sections/AlternativesSection";
 
 interface ActivityDetailProps {
-  activity: Activity;
+  activity: {
+    name: string;
+    description: string;
+    imageUrl: string;
+    tips: string[];
+  };
   onBack: () => void;
   onSelectAlternative: (alternative: { name: string; description: string }) => void;
 }
 
-export default function ActivityDetail({ 
-  activity, 
-  onBack,
-  onSelectAlternative 
-}: ActivityDetailProps) {
-  const { name, description, imageUrl, tips } = activity;
+interface DetailedActivity {
+  equipment: {
+    name: string;
+    description: string;
+    affiliateUrl: string;
+    price: string;
+  }[];
+  locations?: {
+    name: string;
+    description: string;
+    address: string;
+    rating: number;
+  }[];
+  alternatives: {
+    name: string;
+    description: string;
+  }[];
+}
 
-  const alternatives = [
-    { name: "Alternative 1", description: "Description for alternative 1" },
-    { name: "Alternative 2", description: "Description for alternative 2" },
-    { name: "Alternative 3", description: "Description for alternative 3" },
-  ];
+export default function ActivityDetail({ activity, onBack, onSelectAlternative }: ActivityDetailProps) {
+  const [detailedInfo, setDetailedInfo] = useState<DetailedActivity | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchDetailedInfo = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-activity-details', {
+          body: { activityName: activity.name }
+        });
+
+        if (error) throw error;
+        
+        console.log("Received detailed info:", data);
+        setDetailedInfo(data);
+      } catch (error) {
+        console.error("Error fetching detailed info:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load detailed information. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetailedInfo();
+  }, [activity.name, toast]);
+
+  if (loading || !detailedInfo) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <button onClick={onBack} className="text-blue-500">Back</button>
-        <h2 className="text-3xl font-bold text-[#7E69AB]">{name}</h2>
-      </div>
-      <p className="text-gray-600">{description}</p>
-      {imageUrl && <img src={imageUrl} alt={name} className="w-full h-auto rounded-lg" />}
-      <div>
-        <h3 className="text-xl font-semibold text-[#7E69AB]">Tips</h3>
-        <ul className="list-disc list-inside">
-          {tips.map((tip, index) => (
-            <li key={index} className="text-gray-600">{tip}</li>
-          ))}
-        </ul>
+      <Button 
+        onClick={onBack}
+        variant="ghost" 
+        className="mb-4 text-[#7E69AB] hover:text-[#9b87f5]"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Results
+      </Button>
+
+      {/* Hero Section */}
+      <div className="relative h-64 rounded-xl overflow-hidden">
+        <img
+          src={activity.imageUrl || "/placeholder.svg"}
+          alt={activity.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <h1 className="absolute bottom-6 left-6 text-4xl font-bold text-white">
+          {activity.name}
+        </h1>
       </div>
 
-      {alternatives && alternatives.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-[#7E69AB]">Similar Activities</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {alternatives.map((alt, index) => (
-              <div
-                key={index}
-                onClick={() => onSelectAlternative(alt)}
-                className="p-4 rounded-lg border border-[#D6BCFA] hover:bg-[#F1F0FB] cursor-pointer transition-colors duration-200"
-              >
-                <h4 className="font-medium text-[#7E69AB]">{alt.name}</h4>
-                <p className="text-sm text-gray-600">{alt.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Description */}
+      <div className="p-6 rounded-lg border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
+        <p className="text-lg text-gray-700 leading-relaxed">
+          {activity.description}
+        </p>
+      </div>
+
+      {/* Sections */}
+      <TutorialsSection activityName={activity.name} />
+      <EquipmentSection equipment={detailedInfo.equipment} />
+      {detailedInfo.locations && (
+        <LocationsSection locations={detailedInfo.locations} />
       )}
+      <AlternativesSection 
+        alternatives={detailedInfo.alternatives} 
+        onSelectAlternative={onSelectAlternative}
+      />
     </div>
   );
 }

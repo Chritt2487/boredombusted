@@ -13,19 +13,12 @@ const corsHeaders = {
 const activityCache = new Map();
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    if (!openAIApiKey) {
-      console.error('OpenAI API key is not set');
-      throw new Error('OpenAI API key is not configured');
-    }
-
     const { activityName } = await req.json();
-    console.log('Processing request for activity:', activityName);
     
     // Check cache first
     const cachedData = activityCache.get(activityName);
@@ -38,133 +31,65 @@ serve(async (req) => {
     }
 
     // Generate detailed information using GPT-4
-    const prompt = `Generate detailed information about the activity "${activityName}". Return ONLY a JSON object with no markdown formatting or additional text. The JSON should follow this structure:
-
+    const prompt = `For the activity "${activityName}", generate detailed information including:
+    1. 3 essential equipment items with names, descriptions, and approximate prices
+    2. 3 alternative activities that someone might also enjoy
+    Format as JSON with this structure:
     {
-      "difficulty": "A clear difficulty level (beginner/intermediate/advanced) with explanation",
-      "timeCommitment": "Realistic time commitment including setup and practice time",
-      "costEstimate": "Detailed cost breakdown including initial and ongoing expenses",
-      "equipment": [
-        {
-          "name": "Specific item name",
-          "description": "Detailed description of why this item is needed",
-          "price": "Estimated price range"
-        }
-      ],
-      "locations": [
-        {
-          "name": "Location name",
-          "description": "Brief description",
-          "address": "General address or area",
-          "rating": 4.5
-        }
-      ],
-      "benefits": {
-        "skills": ["List specific skills developed"],
-        "health": ["List concrete health benefits"],
-        "social": ["List social advantages"]
-      },
-      "community": {
-        "groups": [
-          {
-            "name": "Group name",
-            "description": "Brief description",
-            "link": "Valid URL to join"
-          }
-        ],
-        "events": [
-          {
-            "name": "Event name",
-            "description": "Brief description",
-            "date": "Upcoming or recurring schedule"
-          }
-        ],
-        "hashtags": ["Relevant and active hashtags"]
-      },
-      "alternatives": [
-        {
-          "name": "Similar activity name",
-          "description": "Why it's a good alternative"
-        }
-      ]
+      "equipment": [{"name": "", "description": "", "price": ""}],
+      "alternatives": [{"name": "", "description": ""}]
     }`;
 
-    console.log('Sending request to OpenAI');
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const gptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4',
         messages: [
-          { 
-            role: 'system', 
-            content: 'You are an expert activity recommendation system. Provide detailed, practical information about activities and hobbies. Return ONLY valid JSON with no markdown formatting.' 
-          },
+          { role: 'system', content: 'You are an expert activity recommendation system.' },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
+        max_tokens: 1000
       }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${response.status}`);
+    if (!gptResponse.ok) {
+      throw new Error('Failed to generate detailed information');
     }
 
-    const data = await response.json();
-    console.log('Received response from OpenAI');
+    const gptData = await gptResponse.json();
+    const detailedInfo = JSON.parse(gptData.choices[0].message.content);
 
-    if (!data.choices?.[0]?.message?.content) {
-      console.error('Invalid response format from OpenAI:', data);
-      throw new Error('Invalid response format from OpenAI');
-    }
+    // Add affiliate links to equipment
+    detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
+      ...item,
+      affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
+    }));
 
-    // Clean the response content to ensure it's valid JSON
-    const cleanContent = data.choices[0].message.content.trim()
-      .replace(/```json\n?|\n?```/g, '') // Remove any markdown code blocks
-      .replace(/^\s*\n/gm, ''); // Remove empty lines
+    // Add YouTube search link for tutorials
+    detailedInfo.tutorials = [{
+      title: `${activityName} Tutorials`,
+      description: `Find helpful tutorials and guides for ${activityName}`,
+      url: `https://www.youtube.com/results?search_query=${encodeURIComponent(activityName)}+tutorial+guide+how+to`,
+    }];
 
-    console.log('Cleaned content:', cleanContent);
-    
-    try {
-      const detailedInfo = JSON.parse(cleanContent);
+    // Cache the results
+    activityCache.set(activityName, detailedInfo);
+    console.log("Caching new data for:", activityName);
 
-      // Add affiliate links to equipment
-      if (amazonAffiliateKey) {
-        detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
-          ...item,
-          affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
-        }));
-      }
-
-      // Cache the results
-      activityCache.set(activityName, detailedInfo);
-      console.log("Caching new data for:", activityName);
-
-      return new Response(
-        JSON.stringify(detailedInfo),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } catch (parseError) {
-      console.error('Error parsing OpenAI response:', parseError);
-      console.error('Content that failed to parse:', cleanContent);
-      throw new Error(`Failed to parse OpenAI response: ${parseError.message}`);
-    }
-  } catch (error) {
-    console.error('Error in get-activity-details function:', error);
     return new Response(
-      JSON.stringify({ 
-        error: 'Failed to generate detailed information',
-        details: error.message 
-      }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      JSON.stringify(detailedInfo),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Error generating detailed information:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to generate detailed information' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

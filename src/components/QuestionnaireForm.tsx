@@ -18,9 +18,6 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
     timeCommitment: "",
     budget: "",
     social: "",
-    skillLevel: "",
-    travelDistance: "",
-    weatherPreference: "",
   });
   const [isComplete, setIsComplete] = useState(false);
 
@@ -49,21 +46,6 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
       title: "Do you want to do this alone or with others?",
       options: ["Solo", "With friends", "Either"],
       field: "social",
-    },
-    {
-      title: "What's your skill level for new activities?",
-      options: ["Beginner", "Intermediate", "Advanced"],
-      field: "skillLevel",
-    },
-    {
-      title: "How far are you willing to travel?",
-      options: ["Local (< 5 miles)", "Nearby (5-20 miles)", "Far (20+ miles)"],
-      field: "travelDistance",
-    },
-    {
-      title: "What's your preferred weather condition?",
-      options: ["Any weather", "Only good weather", "Indoor only"],
-      field: "weatherPreference",
     },
   ];
 
@@ -105,7 +87,6 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
           {currentQuestion.options.map((option) => (
             <div
               key={option}
-              onClick={() => handleOptionSelect(option)}
               className="flex items-center space-x-2 p-4 rounded-lg border border-[#D6BCFA] hover:bg-[#F1F0FB] cursor-pointer transition-colors duration-200"
             >
               <RadioGroupItem value={option} id={option} />
