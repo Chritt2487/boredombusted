@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import TutorialsSection from "./sections/TutorialsSection";
@@ -10,7 +10,8 @@ import OverviewSection from "./sections/OverviewSection";
 import QuickBenefitsSection from "./sections/QuickBenefitsSection";
 import GettingStartedSection from "./sections/GettingStartedSection";
 import BenefitsSection from "./sections/BenefitsSection";
-import { Card, CardContent } from "@/components/ui/card";
+import LoadingState from "./sections/LoadingState";
+import ErrorState from "./sections/ErrorState";
 
 interface ActivityDetailProps {
   activity: {
@@ -92,29 +93,11 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
   }, [activity.name, toast]);
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-[#9b87f5]" />
-        <p className="text-gray-600">Loading activity details...</p>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!detailedInfo) {
-    return (
-      <div className="space-y-4">
-        <Button onClick={onBack} variant="ghost" className="mb-4">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Results
-        </Button>
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-center text-gray-600">
-              Could not load activity details. Please try again later.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <ErrorState onBack={onBack} />;
   }
 
   const activityImage = getActivityImage(activity.name);
@@ -146,7 +129,9 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
         />
       )}
 
-      {detailedInfo.equipment && <EquipmentSection equipment={detailedInfo.equipment} />}
+      {detailedInfo.equipment && (
+        <EquipmentSection equipment={detailedInfo.equipment} />
+      )}
 
       {(detailedInfo.benefits?.skills || detailedInfo.benefits?.health) && (
         <BenefitsSection 

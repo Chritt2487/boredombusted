@@ -25,10 +25,16 @@ export default function BenefitsSection({ skills, health }: BenefitsSectionProps
           {skills && (
             <div className="space-y-4">
               <h3 className="font-semibold text-[#7E69AB]">Skills Developed</h3>
-              <ul className="list-disc list-inside space-y-2">
+              <ul className="space-y-2 ml-4">
                 {skills.map((skill, index) => (
-                  <li key={index} className="text-gray-700">
-                    <div dangerouslySetInnerHTML={{ __html: boldKeywords(skill) }} />
+                  <li 
+                    key={index} 
+                    className="text-gray-700 relative pl-5 before:content-['•'] before:absolute before:left-0 before:text-[#7E69AB]"
+                  >
+                    <div 
+                      className="inline-block"
+                      dangerouslySetInnerHTML={{ __html: boldKeywords(skill) }} 
+                    />
                   </li>
                 ))}
               </ul>
@@ -37,10 +43,16 @@ export default function BenefitsSection({ skills, health }: BenefitsSectionProps
           {health && (
             <div className="space-y-4">
               <h3 className="font-semibold text-[#7E69AB]">Health Benefits</h3>
-              <ul className="list-disc list-inside space-y-2">
+              <ul className="space-y-2 ml-4">
                 {health.map((benefit, index) => (
-                  <li key={index} className="text-gray-700">
-                    <div dangerouslySetInnerHTML={{ __html: boldKeywords(benefit) }} />
+                  <li 
+                    key={index} 
+                    className="text-gray-700 relative pl-5 before:content-['•'] before:absolute before:left-0 before:text-[#7E69AB]"
+                  >
+                    <div 
+                      className="inline-block"
+                      dangerouslySetInnerHTML={{ __html: boldKeywords(benefit) }} 
+                    />
                   </li>
                 ))}
               </ul>
