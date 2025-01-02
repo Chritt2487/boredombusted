@@ -13,6 +13,7 @@ interface ResultsDisplayProps {
     timeCommitment: string;
     budget: string;
     social: string;
+    isRandom?: boolean;
   };
 }
 
