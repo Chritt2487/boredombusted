@@ -22,6 +22,7 @@ interface Activity {
   description: string;
   imageUrl: string;
   tips: string[];
+  benefits: string[]; // Added this field
 }
 
 export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
@@ -61,8 +62,9 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
     const newActivity: Activity = {
       name: alternative.name,
       description: alternative.description,
-      imageUrl: "/placeholder.svg", // Use placeholder image
-      tips: [], // Empty tips array as we'll get detailed info from the API
+      imageUrl: "/placeholder.svg",
+      tips: [],
+      benefits: [], // Added empty benefits array
     };
     setSelectedActivity(newActivity);
   };

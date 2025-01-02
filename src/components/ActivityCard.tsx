@@ -7,6 +7,7 @@ interface ActivityCardProps {
     description: string;
     imageUrl: string;
     tips: string[];
+    benefits: string[];
   };
   onSelect: (activity: any) => void;
 }
