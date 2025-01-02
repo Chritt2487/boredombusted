@@ -42,9 +42,15 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
   }
 
   const handleOptionSelect = (value: string) => {
+    const currentQuestion = questions[currentStep];
+    if (!currentQuestion) {
+      console.error("Question not found for step:", currentStep);
+      return;
+    }
+
     setAnswers((prev) => ({
       ...prev,
-      [questions[currentStep].field]: value,
+      [currentQuestion.field]: value,
     }));
   };
 
@@ -62,13 +68,18 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
   }
 
   const currentQuestion = questions[currentStep];
-  const currentValue = answers[currentQuestion.field as keyof typeof answers] as string;
+  
+  // Add safety check for currentQuestion
+  if (!currentQuestion) {
+    console.error("Question not found for step:", currentStep);
+    return null;
+  }
 
   return (
     <QuestionCard
       title={currentQuestion.title}
       options={currentQuestion.options}
-      selectedValue={currentValue}
+      selectedValue={answers[currentQuestion.field as keyof typeof answers] as string}
       onSelect={handleOptionSelect}
       onNext={handleNext}
       isLastQuestion={currentStep === questions.length - 1}
