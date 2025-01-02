@@ -15,6 +15,7 @@ interface ActivityDetailProps {
     benefits: string[];
   };
   onBack: () => void;
+  onSelectAlternative: (alternative: { name: string; description: string; }) => void;
 }
 
 interface DetailedActivity {
@@ -40,7 +41,7 @@ interface DetailedActivity {
   };
 }
 
-export default function ActivityDetail({ activity, onBack }: ActivityDetailProps) {
+export default function ActivityDetail({ activity, onBack, onSelectAlternative }: ActivityDetailProps) {
   const [detailedInfo, setDetailedInfo] = useState<DetailedActivity | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
