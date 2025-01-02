@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ResultsDisplayProps {
   answers: {
@@ -30,19 +31,14 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
-        const response = await fetch("/api/generate-recommendations", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ answers }),
+        const { data, error } = await supabase.functions.invoke('generate-recommendations', {
+          body: { answers }
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch recommendations");
+        if (error) {
+          throw error;
         }
 
-        const data = await response.json();
         console.log("Received recommendations:", data);
         setActivities(data.activities);
       } catch (error) {

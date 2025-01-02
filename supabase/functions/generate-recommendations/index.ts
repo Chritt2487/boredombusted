@@ -9,12 +9,14 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { answers } = await req.json();
+    console.log('Received answers:', answers);
     
     // Create a detailed prompt based on user answers
     const prompt = `Based on these preferences:
@@ -63,6 +65,7 @@ serve(async (req) => {
     });
 
     const gptData = await gptResponse.json();
+    console.log('GPT Response:', gptData);
     const recommendations = JSON.parse(gptData.choices[0].message.content);
 
     // Generate images for each activity
