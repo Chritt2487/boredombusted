@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 interface HeroSectionProps {
   name: string;
   onBack: () => void;
+  imageUrl: string;
 }
 
-export default function HeroSection({ name, onBack }: HeroSectionProps) {
+export default function HeroSection({ name, onBack, imageUrl }: HeroSectionProps) {
   return (
     <>
       <Button 
@@ -19,7 +20,7 @@ export default function HeroSection({ name, onBack }: HeroSectionProps) {
 
       <div className="relative h-64 rounded-xl overflow-hidden">
         <img
-          src={`https://source.unsplash.com/featured/?${encodeURIComponent(name)}`}
+          src={imageUrl}
           alt={name}
           className="w-full h-full object-cover"
         />

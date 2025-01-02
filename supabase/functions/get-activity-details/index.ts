@@ -25,8 +25,8 @@ serve(async (req) => {
       console.warn('Amazon Affiliate key is not configured, using default links');
     }
 
-    const { activityName, isRandom } = await req.json();
-    console.log("Processing request for activity:", activityName, "isRandom:", isRandom);
+    const { activityName } = await req.json();
+    console.log("Processing request for activity:", activityName);
     
     if (!activityName) {
       throw new Error('Activity name is required');
@@ -97,23 +97,6 @@ serve(async (req) => {
         ...item,
         affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey || 'default-tag'}`,
       }));
-
-      // Validate the response structure
-      const requiredFields = [
-        'equipment',
-        'difficulty',
-        'timeCommitment',
-        'costEstimate',
-        'history',
-        'gettingStarted',
-        'benefits'
-      ];
-
-      for (const field of requiredFields) {
-        if (!detailedInfo[field]) {
-          throw new Error(`Missing required field: ${field}`);
-        }
-      }
 
     } catch (error) {
       console.error("Error parsing OpenAI response:", error);
