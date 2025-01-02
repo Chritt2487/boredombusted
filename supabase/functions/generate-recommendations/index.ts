@@ -9,11 +9,19 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('Starting generate-recommendations function');
+    
+    if (!openAIApiKey) {
+      console.error('OpenAI API key is not configured');
+      throw new Error('OpenAI API key is not configured');
+    }
+
     const { answers } = await req.json();
     console.log('Received answers:', answers);
     
@@ -41,6 +49,7 @@ serve(async (req) => {
       ]
     }`;
 
+    console.log('Sending request to OpenAI');
     const gptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -48,7 +57,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           { 
             role: 'system', 
@@ -62,17 +71,21 @@ serve(async (req) => {
     });
 
     if (!gptResponse.ok) {
-      throw new Error('Failed to generate recommendations from OpenAI');
+      const errorText = await gptResponse.text();
+      console.error('OpenAI API error:', errorText);
+      throw new Error(`OpenAI API error: ${errorText}`);
     }
 
     const gptData = await gptResponse.json();
-    console.log('GPT Response:', gptData);
-    
-    if (!gptData.choices?.[0]?.message?.content) {
+    console.log('Received response from OpenAI');
+
+    let recommendations;
+    try {
+      recommendations = JSON.parse(gptData.choices[0].message.content);
+    } catch (error) {
+      console.error('Error parsing OpenAI response:', error);
       throw new Error('Invalid response format from OpenAI');
     }
-
-    const recommendations = JSON.parse(gptData.choices[0].message.content);
 
     // Add placeholder images
     const activitiesWithImages = recommendations.activities.map((activity: any) => ({
@@ -80,15 +93,22 @@ serve(async (req) => {
       imageUrl: '/placeholder.svg',
     }));
 
+    console.log('Sending response with activities:', activitiesWithImages);
     return new Response(
       JSON.stringify({ activities: activitiesWithImages }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error generating recommendations:', error);
+    console.error('Error in generate-recommendations:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to generate recommendations' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        error: 'Failed to generate recommendations',
+        details: error.message 
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     );
   }
 });
