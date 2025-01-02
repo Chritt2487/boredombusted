@@ -6,7 +6,6 @@ import OverviewSection from "./sections/OverviewSection";
 import QuickBenefitsSection from "./sections/QuickBenefitsSection";
 import GettingStartedSection from "./sections/GettingStartedSection";
 import BenefitsSection from "./sections/BenefitsSection";
-import SimilarActivities from "./sections/SimilarActivities";
 import LoadingState from "./sections/LoadingState";
 import ErrorState from "./sections/ErrorState";
 import HeroSection from "./activity-detail/HeroSection";
@@ -14,14 +13,8 @@ import { getActivityImage } from "./activity-detail/ActivityImageMap";
 import { useActivityDetail } from "./activity-detail/useActivityDetail";
 import type { ActivityDetailProps } from "./activity-detail/types";
 
-export default function ActivityDetail({ activity, onBack, onSelectAlternative }: ActivityDetailProps) {
-  const { detailedInfo, loading, similarActivities } = useActivityDetail(activity.name);
-
-  const handleSelectAlternative = (alternative: { name: string; description: string }) => {
-    console.log("Selected alternative activity:", alternative.name);
-    onSelectAlternative(alternative);
-    window.location.reload();
-  };
+export default function ActivityDetail({ activity, onBack }: ActivityDetailProps) {
+  const { detailedInfo, loading } = useActivityDetail(activity.name);
 
   if (loading) {
     return <LoadingState />;
@@ -71,13 +64,6 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
         />
       )}
 
-      {similarActivities.length > 0 && (
-        <SimilarActivities 
-          activities={similarActivities}
-          onSelectAlternative={handleSelectAlternative}
-        />
-      )}
-
       <TutorialsSection activityName={activity.name} />
 
       <div className="flex justify-center">
@@ -85,7 +71,7 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
           onClick={onBack}
           className="bg-[#9b87f5] hover:bg-[#7E69AB]"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to All Activities
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Results
         </Button>
       </div>
     </div>

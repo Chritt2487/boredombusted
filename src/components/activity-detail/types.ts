@@ -29,5 +29,4 @@ export interface ActivityDetailProps {
     benefits: string[];
   };
   onBack: () => void;
-  onSelectAlternative: (alternative: { name: string; description: string; }) => void;
 }
