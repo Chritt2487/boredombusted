@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ActivityDetail from "./ActivityDetail";
-import ActivityCard from "./ActivityCard";
+import LoadingState from "./results/LoadingState";
+import ResultsHeader from "./results/ResultsHeader";
+import ResultsGrid from "./results/ResultsGrid";
+import { Activity } from "./results/types";
 
 interface ResultsDisplayProps {
   answers: {
@@ -15,16 +17,6 @@ interface ResultsDisplayProps {
     social: string;
     isRandom?: boolean;
   };
-}
-
-interface Activity {
-  name: string;
-  description: string;
-  imageUrl: string;
-  difficulty?: string;
-  timeCommitment?: string;
-  costEstimate?: string;
-  benefits: string[]; // Changed from optional to required
 }
 
 export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
@@ -41,12 +33,11 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
         });
 
         if (error) throw error;
-
+        
         console.log("Received recommendations:", data);
-        // Ensure benefits array exists for each activity
         const activitiesWithBenefits = data.activities.map((activity: any) => ({
           ...activity,
-          benefits: activity.benefits || [] // Provide empty array as fallback
+          benefits: activity.benefits || []
         }));
         setActivities(activitiesWithBenefits);
       } catch (error) {
@@ -69,18 +60,13 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
       name: alternative.name,
       description: alternative.description,
       imageUrl: "/placeholder.svg",
-      benefits: [], // Add empty benefits array for alternatives
+      benefits: [],
     };
     setSelectedActivity(newActivity);
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-[#9b87f5]" />
-        <p className="text-gray-600">Crafting perfect recommendations for you...</p>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (selectedActivity) {
@@ -95,20 +81,11 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
 
   return (
     <div className="space-y-8">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-[#7E69AB] mb-2">Your Perfect Activities</h2>
-        <p className="text-gray-600">Based on your preferences, here are some activities we think you'll love</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {activities.map((activity, index) => (
-          <ActivityCard
-            key={index}
-            activity={activity}
-            onSelect={setSelectedActivity}
-          />
-        ))}
-      </div>
+      <ResultsHeader />
+      <ResultsGrid 
+        activities={activities}
+        onSelectActivity={setSelectedActivity}
+      />
     </div>
   );
 }
