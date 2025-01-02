@@ -1,4 +1,14 @@
-import { Activity } from './activityTypes';
+import { Activity, ActivityEquipment } from './activityTypes';
+
+export function convertEquipmentToWordPressMetaFormat(equipment: ActivityEquipment[]) {
+  return equipment.map(item => ({
+    name: item.name,
+    description: item.description,
+    estimated_cost: item.estimatedCost,
+    affiliate_url: item.affiliateUrl || '',
+    required: item.required
+  }));
+}
 
 export function convertActivityToWordPressPost(activity: Activity) {
   return {
@@ -13,7 +23,7 @@ export function convertActivityToWordPressPost(activity: Activity) {
       time_commitment: activity.timeCommitment,
       cost_estimate: activity.costEstimate,
       benefits: activity.benefits,
-      equipment: activity.equipment,
+      equipment: convertEquipmentToWordPressMetaFormat(activity.equipment),
       getting_started: activity.gettingStarted,
       activity_tags: activity.tags
     }
@@ -22,7 +32,7 @@ export function convertActivityToWordPressPost(activity: Activity) {
 
 export function generateWordPressCustomPostType() {
   return `
-    // WordPress PHP code to register custom post type
+    // WordPress PHP code to register custom post type and meta fields
     function register_hobby_post_type() {
       $args = array(
         'public' => true,
@@ -33,6 +43,27 @@ export function generateWordPressCustomPostType() {
         'rewrite' => array('slug' => 'hobbies'),
       );
       register_post_type('hobby', $args);
+      
+      // Register meta fields for equipment
+      register_post_meta('hobby', 'equipment', array(
+        'type' => 'array',
+        'single' => true,
+        'show_in_rest' => array(
+          'schema' => array(
+            'type' => 'array',
+            'items' => array(
+              'type' => 'object',
+              'properties' => array(
+                'name' => array('type' => 'string'),
+                'description' => array('type' => 'string'),
+                'estimated_cost' => array('type' => 'string'),
+                'affiliate_url' => array('type' => 'string'),
+                'required' => array('type' => 'boolean')
+              )
+            )
+          )
+        )
+      ));
     }
     add_action('init', 'register_hobby_post_type');
   `;
