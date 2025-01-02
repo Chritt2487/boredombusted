@@ -111,6 +111,14 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activity.name, toast]);
 
+  const handleSelectAlternative = (alternative: { name: string; description: string }) => {
+    console.log("Selected alternative activity:", alternative.name);
+    // Call the provided onSelectAlternative function
+    onSelectAlternative(alternative);
+    // Reload the page
+    window.location.reload();
+  };
+
   if (loading) {
     return <LoadingState />;
   }
@@ -162,7 +170,7 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
       {similarActivities.length > 0 && (
         <SimilarActivities 
           activities={similarActivities}
-          onSelectAlternative={onSelectAlternative}
+          onSelectAlternative={handleSelectAlternative}
         />
       )}
 
