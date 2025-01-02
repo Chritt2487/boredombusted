@@ -9,9 +9,19 @@ interface QuestionnaireFormProps {
   initialChoice: string;
 }
 
+interface AnswersType {
+  initialChoice: string;
+  environment: string;
+  activityLevel: string;
+  timeCommitment: string;
+  budget: string;
+  social: string;
+  isRandom?: boolean;
+}
+
 export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState({
+  const [answers, setAnswers] = useState<AnswersType>({
     initialChoice,
     environment: "",
     activityLevel: "",
