@@ -16,7 +16,7 @@ export default function EquipmentSection({ equipment }: EquipmentSectionProps) {
     const getAffiliateId = async () => {
       const { data, error } = await supabase.rpc('get_secret', { 
         name: 'AMAZON_AFFILIATE_KEY' 
-      });
+      } as { name: string });
       
       if (error) {
         console.error('Error fetching affiliate ID:', error);
