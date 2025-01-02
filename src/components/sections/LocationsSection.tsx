@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
-import { useEffect, useState } from "react";
 
 interface LocationsSectionProps {
   locations: {
@@ -12,29 +11,6 @@ interface LocationsSectionProps {
 }
 
 export default function LocationsSection({ locations }: LocationsSectionProps) {
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-
-  useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-        }
-      );
-    }
-  }, []);
-
-  // If no locations are provided or user location is not available, don't render the section
-  if (!locations?.length || !userLocation) {
-    return null;
-  }
-
   return (
     <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
       <CardHeader>

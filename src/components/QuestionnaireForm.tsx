@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import ResultsDisplay from "./ResultsDisplay";
-import QuestionStep from "./questionnaire/QuestionStep";
-import NavigationButtons from "./questionnaire/NavigationButtons";
-import ProgressIndicator from "./questionnaire/ProgressIndicator";
 
 interface QuestionnaireFormProps {
   initialChoice: string;
@@ -29,50 +29,42 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
       title: "Where would you prefer to spend your time?",
       options: ["Indoor", "Outdoor", "Both"],
       field: "environment",
-      image: "photo-1605810230434-7631ac76ec81"
     },
     {
       title: "How active do you want to be?",
       options: ["Relaxed", "Moderate", "Active"],
       field: "activityLevel",
-      image: "photo-1581091226825-a6a2a5aee158"
     },
     {
       title: "How much time do you want to spend?",
       options: ["Short (<1 hour)", "Medium (1-3 hours)", "Long (3+ hours)"],
       field: "timeCommitment",
-      image: "photo-1460925895917-afdab827c52f"
     },
     {
       title: "What's your budget?",
       options: ["Free", "Cheap", "Moderate", "Expensive"],
       field: "budget",
-      image: "photo-1498050108023-c5249f4df085"
     },
     {
       title: "Do you want to do this alone or with others?",
       options: ["Solo", "With friends", "Either"],
       field: "social",
-      image: "photo-1519389950473-47ba0277781c"
     },
     {
-      title: "What's your skill level preference?",
+      title: "What's your skill level for new activities?",
       options: ["Beginner", "Intermediate", "Advanced"],
       field: "skillLevel",
-      image: "photo-1486312338219-ce68d2c6f44d"
     },
     {
       title: "How far are you willing to travel?",
-      options: ["Nearby", "Short drive", "Any distance"],
+      options: ["Local (< 5 miles)", "Nearby (5-20 miles)", "Far (20+ miles)"],
       field: "travelDistance",
-      image: "photo-1473091534298-04dcbce3278c"
     },
     {
-      title: "What weather conditions do you prefer?",
-      options: ["Indoor only", "Any weather", "Fair weather only"],
+      title: "What's your preferred weather condition?",
+      options: ["Any weather", "Only good weather", "Indoor only"],
       field: "weatherPreference",
-      image: "photo-1581092795360-fd1ca04f0952"
-    }
+    },
   ];
 
   const handleOptionSelect = (value: string) => {
@@ -100,29 +92,36 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
   return (
     <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
       <CardHeader>
-        <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
-          <img
-            src={`https://images.unsplash.com/${currentQuestion.image}?w=400&auto=format&fit=crop&q=60`}
-            alt={currentQuestion.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <ProgressIndicator currentStep={currentStep} totalSteps={questions.length} />
         <CardTitle className="text-2xl text-center text-[#7E69AB]">
           {currentQuestion.title}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <QuestionStep
-          question={currentQuestion}
+        <RadioGroup
           value={answers[currentQuestion.field as keyof typeof answers]}
-          onSelect={handleOptionSelect}
-        />
-        <NavigationButtons
-          onNext={handleNext}
-          isLastStep={currentStep === questions.length - 1}
-          isValid={!!answers[currentQuestion.field as keyof typeof answers]}
-        />
+          onValueChange={handleOptionSelect}
+          className="space-y-4"
+        >
+          {currentQuestion.options.map((option) => (
+            <div
+              key={option}
+              onClick={() => handleOptionSelect(option)}
+              className="flex items-center space-x-2 p-4 rounded-lg border border-[#D6BCFA] hover:bg-[#F1F0FB] cursor-pointer transition-colors duration-200"
+            >
+              <RadioGroupItem value={option} id={option} />
+              <Label htmlFor={option} className="cursor-pointer flex-grow">
+                {option}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+        <Button
+          onClick={handleNext}
+          className="w-full mt-6 bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
+          disabled={!answers[currentQuestion.field as keyof typeof answers]}
+        >
+          {currentStep === questions.length - 1 ? "Finish" : "Next"}
+        </Button>
       </CardContent>
     </Card>
   );

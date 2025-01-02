@@ -19,14 +19,14 @@ export default function AlternativesSection({ alternatives, onSelectAlternative 
       </CardHeader>
       <CardContent className="grid gap-4">
         {alternatives.map((alt, index) => (
-          <button 
+          <div 
             key={index} 
-            className="w-full text-left p-4 rounded-lg bg-[#F1F0FB] hover:bg-[#E5DEFF] transition-colors cursor-pointer"
+            className="p-4 rounded-lg bg-[#F1F0FB] hover:bg-[#E5DEFF] transition-colors cursor-pointer"
             onClick={() => onSelectAlternative(alt)}
           >
             <h3 className="font-semibold text-[#7E69AB]">{alt.name}</h3>
             <p className="text-gray-600">{alt.description}</p>
-          </button>
+          </div>
         ))}
       </CardContent>
     </Card>
