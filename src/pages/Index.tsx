@@ -21,13 +21,22 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 bg-background">
+    <div className="min-h-screen p-4 bg-gradient-to-b from-purple-50 to-white">
       <div className="max-w-2xl mx-auto space-y-8">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">
+        {/* Hero Section */}
+        <div className="text-center space-y-4 mb-8">
+          <h1 className="text-4xl font-bold text-[#9b87f5]">Discover Your Next Adventure</h1>
+          <p className="text-gray-600">Let's find the perfect activity that matches your interests</p>
+        </div>
+
+        <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
+          <CardHeader className="space-y-2">
+            <CardTitle className="text-2xl text-center text-[#7E69AB]">
               What are you looking to do?
             </CardTitle>
+            <p className="text-center text-gray-500 text-sm">
+              Choose an option below and we'll help you find the perfect match
+            </p>
           </CardHeader>
           <CardContent>
             <RadioGroup
@@ -36,26 +45,58 @@ const Index = () => {
               className="space-y-4"
             >
               {[
-                "Find a new hobby",
-                "Do something near me",
-                "Learn a skill",
-                "Try something new",
-                "Surprise me",
+                {
+                  value: "Find a new hobby",
+                  icon: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&auto=format&fit=crop&q=60",
+                  description: "Discover exciting new hobbies tailored to your interests"
+                },
+                {
+                  value: "Do something near me",
+                  icon: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&auto=format&fit=crop&q=60",
+                  description: "Explore activities and events in your area"
+                },
+                {
+                  value: "Learn a skill",
+                  icon: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&auto=format&fit=crop&q=60",
+                  description: "Master new skills with personalized learning paths"
+                },
+                {
+                  value: "Try something new",
+                  icon: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&auto=format&fit=crop&q=60",
+                  description: "Step out of your comfort zone with exciting experiences"
+                },
+                {
+                  value: "Surprise me",
+                  icon: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&auto=format&fit=crop&q=60",
+                  description: "Let us suggest something unexpected and fun"
+                },
               ].map((option) => (
                 <div
-                  key={option}
-                  className="flex items-center space-x-2 p-4 rounded-lg border hover:bg-accent cursor-pointer"
+                  key={option.value}
+                  className="flex items-center space-x-4 p-4 rounded-lg border border-[#D6BCFA] hover:bg-[#F1F0FB] cursor-pointer transition-colors duration-200"
                 >
-                  <RadioGroupItem value={option} id={option} />
-                  <Label htmlFor={option} className="cursor-pointer flex-grow">
-                    {option}
-                  </Label>
+                  <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden">
+                    <img 
+                      src={option.icon} 
+                      alt={option.value}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-grow">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value={option.value} id={option.value} />
+                      <Label htmlFor={option.value} className="cursor-pointer font-medium">
+                        {option.value}
+                      </Label>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                  </div>
                 </div>
               ))}
             </RadioGroup>
             <Button
               onClick={handleContinue}
-              className="w-full mt-6"
+              className="w-full mt-6 bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
               disabled={!selectedOption}
             >
               Continue
