@@ -1,11 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Heart, Share2 } from "lucide-react";
+import { Loader2, Share2 } from "lucide-react";
 import { useActivityImage } from "@/hooks/useActivityImage";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { useSession } from "@supabase/auth-helpers-react";
 
 interface ActivityCardProps {
   activity: {
@@ -18,67 +16,11 @@ interface ActivityCardProps {
     benefits?: string[];
   };
   onSelect: (activity: any) => void;
-  isFavorited?: boolean;
-  onFavoriteChange?: () => void;
 }
 
-export default function ActivityCard({ 
-  activity, 
-  onSelect, 
-  isFavorited = false,
-  onFavoriteChange 
-}: ActivityCardProps) {
+export default function ActivityCard({ activity, onSelect }: ActivityCardProps) {
   const { imageUrl, isLoading } = useActivityImage(activity.name, activity.imageUrl);
-  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const { toast } = useToast();
-  const session = useSession();
-
-  const handleFavoriteClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!session?.user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to save favorites",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsTogglingFavorite(true);
-    try {
-      if (isFavorited) {
-        await supabase
-          .from('favorite_activities')
-          .delete()
-          .eq('user_id', session.user.id)
-          .eq('activity_name', activity.name);
-      } else {
-        await supabase
-          .from('favorite_activities')
-          .insert([
-            { user_id: session.user.id, activity_name: activity.name }
-          ]);
-      }
-      
-      if (onFavoriteChange) {
-        onFavoriteChange();
-      }
-      
-      toast({
-        title: isFavorited ? "Removed from favorites" : "Added to favorites",
-        description: `${activity.name} has been ${isFavorited ? 'removed from' : 'added to'} your favorites`,
-      });
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update favorites. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsTogglingFavorite(false);
-    }
-  };
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -117,29 +59,14 @@ export default function ActivityCard({
         </div>
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl text-[#7E69AB]">{activity.name}</CardTitle>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleFavoriteClick}
-              disabled={isTogglingFavorite}
-              className={`hover:bg-[#F1F0FB] ${isFavorited ? 'text-red-500' : 'text-gray-500'}`}
-            >
-              {isTogglingFavorite ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Heart className={`h-5 w-5 ${isFavorited ? 'fill-current' : ''}`} />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleShare}
-              className="hover:bg-[#F1F0FB] text-gray-500"
-            >
-              <Share2 className="h-5 w-5" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleShare}
+            className="hover:bg-[#F1F0FB] text-gray-500"
+          >
+            <Share2 className="h-5 w-5" />
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

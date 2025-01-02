@@ -8,7 +8,6 @@ import ResultsGrid from "./results/ResultsGrid";
 import { Activity } from "./results/types";
 import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
-import { useSession } from "@supabase/auth-helpers-react";
 
 interface ResultsDisplayProps {
   answers: {
@@ -27,33 +26,14 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
-  const [favoriteActivities, setFavoriteActivities] = useState<string[]>([]);
   const { toast } = useToast();
-  const session = useSession();
-
-  const fetchFavorites = async () => {
-    if (!session?.user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('favorite_activities')
-        .select('activity_name')
-        .eq('user_id', session.user.id);
-
-      if (error) throw error;
-      
-      setFavoriteActivities(data.map(fav => fav.activity_name));
-    } catch (error) {
-      console.error("Error fetching favorites:", error);
-    }
-  };
 
   const fetchRecommendations = async (isLoadingMore = false) => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-recommendations', {
         body: { 
           answers,
-          existingActivities: isLoadingMore ? activities.map(a => a.name) : [] // Pass existing activities to avoid duplicates
+          existingActivities: isLoadingMore ? activities.map(a => a.name) : [] 
         }
       });
 
@@ -87,10 +67,6 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
     fetchRecommendations();
   }, [answers]);
 
-  useEffect(() => {
-    fetchFavorites();
-  }, [session?.user]);
-
   const handleLoadMore = async () => {
     setLoadingMore(true);
     await fetchRecommendations(true);
@@ -104,10 +80,7 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
       benefits: [],
     };
     setSelectedActivity(newActivity);
-  };
-
-  const handleFavoriteChange = () => {
-    fetchFavorites();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
@@ -130,8 +103,6 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
       <ResultsGrid 
         activities={activities}
         onSelectActivity={setSelectedActivity}
-        favoriteActivities={favoriteActivities}
-        onFavoriteChange={handleFavoriteChange}
       />
       <div className="flex justify-center">
         <Button

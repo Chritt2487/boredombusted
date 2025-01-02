@@ -108,6 +108,7 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
     };
 
     fetchDetailedInfo();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activity.name, toast]);
 
   if (loading) {
