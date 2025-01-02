@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-type GetSecretResponse = string;
-
 interface GetSecretParams {
   name: string;
 }
@@ -12,7 +10,7 @@ export function useAffiliateId() {
   
   useEffect(() => {
     const getAffiliateId = async () => {
-      const { data, error } = await supabase.rpc<GetSecretResponse, GetSecretParams>('get_secret', {
+      const { data, error } = await supabase.rpc<string, GetSecretParams>('get_secret', {
         name: 'AMAZON_AFFILIATE_KEY'
       });
       
@@ -21,7 +19,7 @@ export function useAffiliateId() {
         return;
       }
       
-      if (data) {
+      if (typeof data === 'string') {
         setAffiliateId(data);
       }
     };
