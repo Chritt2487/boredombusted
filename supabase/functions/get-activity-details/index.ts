@@ -7,9 +7,9 @@ const corsHeaders = {
 };
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const amazonAffiliateKey = Deno.env.get('AMAZON_AFFILIATE_KEY');
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -19,10 +19,6 @@ serve(async (req) => {
     
     if (!openAIApiKey) {
       throw new Error('OpenAI API key is not configured');
-    }
-
-    if (!amazonAffiliateKey) {
-      console.warn('Amazon Affiliate key is not configured, using default links');
     }
 
     const { activityName } = await req.json();
@@ -95,7 +91,7 @@ serve(async (req) => {
       // Add affiliate links to equipment
       detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
         ...item,
-        affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey || 'default-tag'}`,
+        affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${Deno.env.get('AMAZON_AFFILIATE_KEY') || 'default-tag'}`,
       }));
 
     } catch (error) {
@@ -105,7 +101,12 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify(detailedInfo),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
     );
   } catch (error) {
     console.error('Error in get-activity-details:', error);
@@ -116,7 +117,10 @@ serve(async (req) => {
       }),
       { 
         status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
       }
     );
   }
