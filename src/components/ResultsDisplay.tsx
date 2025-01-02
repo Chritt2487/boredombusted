@@ -5,6 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import ActivityDetail from "./ActivityDetail";
 import ActivityCard from "./ActivityCard";
 
+export interface Activity {
+  name: string;
+  description: string;
+  imageUrl: string;
+  tips: string[];
+}
+
 interface ResultsDisplayProps {
   answers: {
     initialChoice: string;
@@ -14,13 +21,6 @@ interface ResultsDisplayProps {
     budget: string;
     social: string;
   };
-}
-
-interface Activity {
-  name: string;
-  description: string;
-  imageUrl: string;
-  tips: string[];
 }
 
 export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
