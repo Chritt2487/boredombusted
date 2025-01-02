@@ -5,12 +5,16 @@ interface GetSecretParams {
   name: string;
 }
 
+type RPCResponse = {
+  data: string | null;
+}
+
 export function useAffiliateId() {
   const [affiliateId, setAffiliateId] = useState<string>("");
   
   useEffect(() => {
     const getAffiliateId = async () => {
-      const { data, error } = await supabase.rpc<string, GetSecretParams>('get_secret', {
+      const { data, error } = await supabase.rpc<RPCResponse, GetSecretParams>('get_secret', {
         name: 'AMAZON_AFFILIATE_KEY'
       });
       
@@ -19,7 +23,7 @@ export function useAffiliateId() {
         return;
       }
       
-      if (typeof data === 'string') {
+      if (data && typeof data === 'string') {
         setAffiliateId(data);
       }
     };
