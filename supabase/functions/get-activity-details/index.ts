@@ -2,15 +2,11 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const amazonAffiliateKey = Deno.env.get('AMAZON_AFFILIATE_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-// Cache for storing activity details to reduce API calls
-const activityCache = new Map();
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -32,25 +28,47 @@ serve(async (req) => {
       throw new Error('Activity name is required');
     }
 
-    // Check cache first
-    const cachedData = activityCache.get(activityName);
-    if (cachedData) {
-      console.log("Returning cached data for:", activityName);
-      return new Response(
-        JSON.stringify(cachedData),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Generate detailed information using GPT-4
-    const prompt = `For the activity "${activityName}", generate detailed information including:
-    1. 3 essential equipment items with names, descriptions, and approximate prices
-    2. Exactly 3 alternative activities that someone might also enjoy
-    Format as JSON with this structure:
+    const prompt = `Generate detailed information about the activity "${activityName}" in the following JSON format:
     {
-      "equipment": [{"name": "", "description": "", "price": ""}],
-      "alternatives": [{"name": "", "description": ""}]
-    }`;
+      "equipment": [
+        {
+          "name": "string",
+          "description": "string",
+          "price": "string (e.g. $20-30)",
+          "affiliateUrl": "string"
+        }
+      ],
+      "locations": [
+        {
+          "name": "string",
+          "description": "string",
+          "address": "string",
+          "rating": number
+        }
+      ],
+      "alternatives": [
+        {
+          "name": "string",
+          "description": "string"
+        }
+      ],
+      "difficulty": "string (Beginner/Intermediate/Advanced)",
+      "timeCommitment": "string",
+      "costEstimate": "string",
+      "history": "string",
+      "gettingStarted": {
+        "steps": ["string"],
+        "beginnerTips": ["string"]
+      },
+      "benefits": {
+        "skills": ["string"],
+        "health": ["string"]
+      },
+      "variations": ["string"],
+      "pairingActivities": ["string"]
+    }
+    
+    Include 3-5 items for equipment, locations, and alternatives. Make the content engaging and informative.`;
 
     console.log("Sending request to OpenAI");
     const gptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -60,13 +78,16 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are an expert activity recommendation system.' },
+          { 
+            role: 'system', 
+            content: 'You are an expert activity recommendation system that provides detailed, accurate information about various activities and hobbies.' 
+          },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 2000
       }),
     });
 
@@ -81,20 +102,38 @@ serve(async (req) => {
     let detailedInfo;
     try {
       detailedInfo = JSON.parse(gptData.choices[0].message.content);
+      
+      // Validate the response structure
+      const requiredFields = [
+        'equipment',
+        'alternatives',
+        'difficulty',
+        'timeCommitment',
+        'costEstimate',
+        'history',
+        'gettingStarted',
+        'benefits',
+        'variations',
+        'pairingActivities'
+      ];
+
+      for (const field of requiredFields) {
+        if (!detailedInfo[field]) {
+          throw new Error(`Missing required field: ${field}`);
+        }
+      }
+
+      // Add affiliate links to equipment
+      const amazonAffiliateKey = Deno.env.get('AMAZON_AFFILIATE_KEY');
+      detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
+        ...item,
+        affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
+      }));
+
     } catch (error) {
       console.error("Error parsing OpenAI response:", error);
       throw new Error('Invalid response format from OpenAI');
     }
-
-    // Add affiliate links to equipment
-    detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
-      ...item,
-      affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
-    }));
-
-    // Cache the results
-    activityCache.set(activityName, detailedInfo);
-    console.log("Caching new data for:", activityName);
 
     return new Response(
       JSON.stringify(detailedInfo),
