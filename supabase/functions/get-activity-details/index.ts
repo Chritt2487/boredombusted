@@ -32,11 +32,29 @@ serve(async (req) => {
 
     // Generate detailed information using GPT-4
     const prompt = `For the activity "${activityName}", generate detailed information including:
-    1. 3 essential equipment items with names, descriptions, and approximate prices
-    2. 3 alternative activities that someone might also enjoy
+    1. Difficulty level (beginner/intermediate/advanced)
+    2. Time commitment (average time needed)
+    3. Cost estimate (startup and ongoing costs)
+    4. 3 essential equipment items with names, descriptions, and approximate prices
+    5. Benefits (skills developed, health benefits, social benefits)
+    6. Community aspects (groups, events, popular hashtags)
+    7. 3 alternative activities that someone might also enjoy
     Format as JSON with this structure:
     {
+      "difficulty": "",
+      "timeCommitment": "",
+      "costEstimate": "",
       "equipment": [{"name": "", "description": "", "price": ""}],
+      "benefits": {
+        "skills": [""],
+        "health": [""],
+        "social": [""]
+      },
+      "community": {
+        "groups": [{"name": "", "description": "", "link": ""}],
+        "events": [{"name": "", "description": "", "date": ""}],
+        "hashtags": [""]
+      },
       "alternatives": [{"name": "", "description": ""}]
     }`;
 
@@ -47,7 +65,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: 'You are an expert activity recommendation system.' },
           { role: 'user', content: prompt }
@@ -69,13 +87,6 @@ serve(async (req) => {
       ...item,
       affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
     }));
-
-    // Add YouTube search link for tutorials
-    detailedInfo.tutorials = [{
-      title: `${activityName} Tutorials`,
-      description: `Find helpful tutorials and guides for ${activityName}`,
-      url: `https://www.youtube.com/results?search_query=${encodeURIComponent(activityName)}+tutorial+guide+how+to`,
-    }];
 
     // Cache the results
     activityCache.set(activityName, detailedInfo);

@@ -3,10 +3,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import OverviewSection from "./sections/OverviewSection";
 import TutorialsSection from "./sections/TutorialsSection";
 import EquipmentSection from "./sections/EquipmentSection";
 import LocationsSection from "./sections/LocationsSection";
 import AlternativesSection from "./sections/AlternativesSection";
+import BenefitsSection from "./sections/BenefitsSection";
+import CommunitySection from "./sections/CommunitySection";
 
 interface ActivityDetailProps {
   activity: {
@@ -36,6 +39,27 @@ interface DetailedActivity {
     name: string;
     description: string;
   }[];
+  difficulty: string;
+  timeCommitment: string;
+  costEstimate: string;
+  benefits: {
+    skills: string[];
+    health: string[];
+    social: string[];
+  };
+  community: {
+    groups: {
+      name: string;
+      description: string;
+      link: string;
+    }[];
+    events: {
+      name: string;
+      description: string;
+      date?: string;
+    }[];
+    hashtags: string[];
+  };
 }
 
 export default function ActivityDetail({ activity, onBack, onSelectAlternative }: ActivityDetailProps) {
@@ -83,32 +107,26 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Results
       </Button>
 
-      {/* Hero Section */}
-      <div className="relative h-64 rounded-xl overflow-hidden">
-        <img
-          src={activity.imageUrl || "/placeholder.svg"}
-          alt={activity.name}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <h1 className="absolute bottom-6 left-6 text-4xl font-bold text-white">
-          {activity.name}
-        </h1>
-      </div>
+      <OverviewSection 
+        name={activity.name}
+        description={activity.description}
+        difficulty={detailedInfo.difficulty}
+        timeCommitment={detailedInfo.timeCommitment}
+        costEstimate={detailedInfo.costEstimate}
+      />
 
-      {/* Description */}
-      <div className="p-6 rounded-lg border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
-        <p className="text-lg text-gray-700 leading-relaxed">
-          {activity.description}
-        </p>
-      </div>
-
-      {/* Sections */}
       <TutorialsSection activityName={activity.name} />
+      
       <EquipmentSection equipment={detailedInfo.equipment} />
+      
       {detailedInfo.locations && (
         <LocationsSection locations={detailedInfo.locations} />
       )}
+
+      <BenefitsSection benefits={detailedInfo.benefits} />
+      
+      <CommunitySection community={detailedInfo.community} />
+      
       <AlternativesSection 
         alternatives={detailedInfo.alternatives} 
         onSelectAlternative={onSelectAlternative}
