@@ -8,9 +8,7 @@ export function useAffiliateId() {
     const getAffiliateId = async () => {
       const { data, error } = await supabase.rpc('get_secret', {
         name: 'AMAZON_AFFILIATE_KEY'
-      }, {
-        count: 'exact'
-      });
+      } as { name: string });
       
       if (error) {
         console.error('Error fetching affiliate ID:', error);
