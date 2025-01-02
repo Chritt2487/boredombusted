@@ -15,26 +15,29 @@ export default function GettingStartedSection({ steps, beginnerTips }: GettingSt
       <CardHeader>
         <CardTitle className="text-[#7E69AB]">Getting Started</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {steps && (
-          <div className="space-y-4">
-            <h3 className="font-semibold text-[#7E69AB]">Step-by-Step Guide</h3>
-            <ol className="list-decimal list-inside space-y-2">
+      <CardContent className="space-y-8">
+        {steps && steps.length > 0 && (
+          <div>
+            <h3 className="font-semibold text-[#7E69AB] mb-4">Step-by-Step Guide</h3>
+            <ol className="space-y-3 list-none pl-0">
               {steps.map((step, index) => (
-                <li key={index} className="text-gray-700">
-                  <div dangerouslySetInnerHTML={{ __html: boldKeywords(step) }} />
+                <li key={index} className="flex gap-3 text-gray-700">
+                  <span className="flex-shrink-0 font-medium text-[#7E69AB]">{index + 1}.</span>
+                  <span dangerouslySetInnerHTML={{ __html: boldKeywords(step) }} />
                 </li>
               ))}
             </ol>
           </div>
         )}
-        {beginnerTips && (
-          <div className="space-y-4">
-            <h3 className="font-semibold text-[#7E69AB]">Tips for Beginners</h3>
-            <ul className="list-disc list-inside space-y-2">
+        
+        {beginnerTips && beginnerTips.length > 0 && (
+          <div>
+            <h3 className="font-semibold text-[#7E69AB] mb-4">Tips for Beginners</h3>
+            <ul className="space-y-3 list-none pl-0">
               {beginnerTips.map((tip, index) => (
-                <li key={index} className="text-gray-700">
-                  <div dangerouslySetInnerHTML={{ __html: boldKeywords(tip) }} />
+                <li key={index} className="flex gap-3 text-gray-700">
+                  <span className="flex-shrink-0 text-[#7E69AB]">•</span>
+                  <span dangerouslySetInnerHTML={{ __html: boldKeywords(tip) }} />
                 </li>
               ))}
             </ul>
