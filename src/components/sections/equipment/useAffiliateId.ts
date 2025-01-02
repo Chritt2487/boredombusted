@@ -12,7 +12,7 @@ export function useAffiliateId() {
   
   useEffect(() => {
     const getAffiliateId = async () => {
-      const { data, error } = await supabase.rpc<GetSecretResponse>('get_secret', {
+      const { data, error } = await supabase.rpc<GetSecretResponse, GetSecretParams>('get_secret', {
         name: 'AMAZON_AFFILIATE_KEY'
       });
       
