@@ -29,6 +29,12 @@ export default function EquipmentSection({ equipment }: EquipmentSectionProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="p-4 rounded-lg bg-[#F1F0FB]">
+          <p className="text-sm text-gray-600 italic">
+            As an Amazon Associate, we may earn from qualifying purchases. Recommendations are based on personal experience and user reviews.
+          </p>
+        </div>
+
         {Object.entries(groupedEquipment).map(([category, items]) => (
           <div key={category} className="space-y-4">
             <h3 className="font-semibold text-lg text-[#7E69AB]">
@@ -47,7 +53,7 @@ export default function EquipmentSection({ equipment }: EquipmentSectionProps) {
                       href={item.affiliateUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-[#9b87f5] hover:text-[#7E69AB] transition-colors"
+                      className="inline-block px-4 py-2 bg-[#9b87f5] hover:bg-[#7E69AB] text-white rounded-lg transition-colors text-sm"
                     >
                       View on Amazon →
                     </a>

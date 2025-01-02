@@ -9,6 +9,7 @@ import EquipmentSection from "./sections/EquipmentSection";
 import LocationsSection from "./sections/LocationsSection";
 import AlternativesSection from "./sections/AlternativesSection";
 import BenefitsSection from "./sections/BenefitsSection";
+import ResourcesSection from "./sections/ResourcesSection";
 
 interface ActivityDetailProps {
   activity: Activity;
@@ -52,10 +53,21 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
 
       <BenefitsSection benefits={detailedInfo.benefits} />
       
+      <ResourcesSection activityName={activity.name} />
+      
       <AlternativesSection 
-        alternatives={detailedInfo.alternatives} 
+        alternatives={detailedInfo.alternatives.slice(0, 3)} 
         onSelectAlternative={onSelectAlternative}
       />
+
+      <div className="flex justify-center pt-4">
+        <Button 
+          onClick={onBack}
+          className="bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
+        >
+          Back to Results
+        </Button>
+      </div>
     </div>
   );
 }

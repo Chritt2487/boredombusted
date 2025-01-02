@@ -71,6 +71,7 @@ serve(async (req) => {
           "name": "Item name",
           "description": "Brief description",
           "price": "Price range",
+          "affiliateUrl": "Amazon affiliate URL",
           "category": "required/recommended/professional"
         }
       ],
@@ -82,7 +83,15 @@ serve(async (req) => {
       "alternatives": [
         {
           "name": "Similar activity name",
-          "description": "Why it's a good alternative"
+          "description": "Why it's a good alternative (2-3 sentences)"
+        },
+        {
+          "name": "Another similar activity",
+          "description": "Why it's a good alternative (2-3 sentences)"
+        },
+        {
+          "name": "One more alternative",
+          "description": "Why it's a good alternative (2-3 sentences)"
         }
       ]
     }`;
@@ -94,7 +103,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4',
         messages: [
           { 
             role: 'system', 
@@ -113,7 +122,20 @@ serve(async (req) => {
     const data = await response.json();
     const detailedInfo = JSON.parse(data.choices[0].message.content.trim());
 
-    // Add the generated image and locations to the response
+    // Ensure we have exactly 3 alternatives
+    if (detailedInfo.alternatives.length < 3) {
+      console.log('Adding more alternatives to meet minimum of 3');
+      while (detailedInfo.alternatives.length < 3) {
+        detailedInfo.alternatives.push({
+          name: `Alternative Activity ${detailedInfo.alternatives.length + 1}`,
+          description: `Another great option for those interested in ${activityName}.`
+        });
+      }
+    } else if (detailedInfo.alternatives.length > 3) {
+      console.log('Trimming alternatives to maximum of 3');
+      detailedInfo.alternatives = detailedInfo.alternatives.slice(0, 3);
+    }
+
     const fullResponse = {
       ...detailedInfo,
       imageUrl,
