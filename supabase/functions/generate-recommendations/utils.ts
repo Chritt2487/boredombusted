@@ -5,7 +5,7 @@ export const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-export function generatePrompt(answers: UserAnswers): string {
+export function generatePrompt(answers: UserAnswers, existingActivities: string[] = []): string {
   return `Based on these preferences:
     - Main interest: ${answers.initialChoice}
     - Environment: ${answers.environment}
@@ -14,7 +14,9 @@ export function generatePrompt(answers: UserAnswers): string {
     - Budget: ${answers.budget}
     - Social Setting: ${answers.social}
 
-    Generate 4 activity recommendations. Return ONLY a valid JSON object with this exact structure, no additional text:
+    Generate 4 activity recommendations that are NOT in this list: ${existingActivities.join(', ')}
+    
+    Return ONLY a valid JSON object with this exact structure, no additional text:
     {
       "activities": [
         {

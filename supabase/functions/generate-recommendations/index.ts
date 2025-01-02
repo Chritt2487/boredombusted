@@ -20,10 +20,14 @@ serve(async (req) => {
       throw new Error('OpenAI API key is not configured');
     }
 
-    const { answers } = await req.json() as { answers: UserAnswers };
+    const { answers, existingActivities = [] } = await req.json() as { 
+      answers: UserAnswers;
+      existingActivities?: string[];
+    };
     console.log('Received answers:', answers);
+    console.log('Existing activities:', existingActivities);
     
-    const prompt = generatePrompt(answers);
+    const prompt = generatePrompt(answers, existingActivities);
     const gptData = await generateOpenAIResponse(openAIApiKey, prompt);
     console.log('Received response from OpenAI:', gptData);
 
