@@ -8,7 +8,7 @@ import ResultsGrid from "./results/ResultsGrid";
 import { Activity } from "./results/types";
 import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@supabase/auth-helpers-react";
+import { useSession } from "@supabase/auth-helpers-react";
 
 interface ResultsDisplayProps {
   answers: {
@@ -29,7 +29,7 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [favoriteActivities, setFavoriteActivities] = useState<string[]>([]);
   const { toast } = useToast();
-  const session = useAuth();
+  const session = useSession();
 
   const fetchFavorites = async () => {
     if (!session?.user) return;

@@ -5,7 +5,7 @@ import { useActivityImage } from "@/hooks/useActivityImage";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@supabase/auth-helpers-react";
+import { useSession } from "@supabase/auth-helpers-react";
 
 interface ActivityCardProps {
   activity: {
@@ -31,7 +31,7 @@ export default function ActivityCard({
   const { imageUrl, isLoading } = useActivityImage(activity.name, activity.imageUrl);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const { toast } = useToast();
-  const session = useAuth();
+  const session = useSession();
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();

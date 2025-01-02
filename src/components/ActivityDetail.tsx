@@ -10,6 +10,7 @@ import OverviewSection from "./sections/OverviewSection";
 import QuickBenefitsSection from "./sections/QuickBenefitsSection";
 import GettingStartedSection from "./sections/GettingStartedSection";
 import BenefitsSection from "./sections/BenefitsSection";
+import SimilarActivities from "./sections/SimilarActivities";
 import LoadingState from "./sections/LoadingState";
 import ErrorState from "./sections/ErrorState";
 
@@ -158,23 +159,10 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
       )}
 
       {similarActivities.length > 0 && (
-        <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-[#7E69AB]">Similar Activities</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            {similarActivities.map((similar, index) => (
-              <div 
-                key={index}
-                className="p-4 rounded-lg bg-[#F1F0FB] hover:bg-[#E5DEFF] transition-colors cursor-pointer"
-                onClick={() => onSelectAlternative(similar)}
-              >
-                <h3 className="font-semibold text-[#7E69AB]">{similar.name}</h3>
-                <p className="text-gray-600">{similar.description}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <SimilarActivities 
+          activities={similarActivities}
+          onSelectAlternative={onSelectAlternative}
+        />
       )}
 
       <TutorialsSection activityName={activity.name} />
