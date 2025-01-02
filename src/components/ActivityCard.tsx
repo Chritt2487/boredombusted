@@ -27,11 +27,16 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
         setIsLoading(true);
         try {
           // First check if we already have an image stored
-          const { data: existingImage } = await supabase
+          const { data: existingImage, error: fetchError } = await supabase
             .from('activity_images')
             .select('image_url')
             .eq('activity_name', activity.name)
-            .single();
+            .maybeSingle();
+
+          if (fetchError) {
+            console.error("Error fetching image:", fetchError);
+            throw fetchError;
+          }
 
           if (existingImage) {
             setImageUrl(existingImage.image_url);
@@ -41,19 +46,31 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
               body: { activityName: activity.name }
             });
 
-            if (error) throw error;
+            if (error) {
+              console.error("Error generating image:", error);
+              throw error;
+            }
 
-            // Store the generated image URL
-            await supabase
-              .from('activity_images')
-              .insert([
-                { activity_name: activity.name, image_url: data.image }
-              ]);
+            if (data?.image) {
+              // Store the generated image URL
+              const { error: insertError } = await supabase
+                .from('activity_images')
+                .insert([
+                  { activity_name: activity.name, image_url: data.image }
+                ]);
 
-            setImageUrl(data.image);
+              if (insertError) {
+                console.error("Error storing image URL:", insertError);
+                throw insertError;
+              }
+
+              setImageUrl(data.image);
+            }
           }
         } catch (error) {
-          console.error("Error generating image:", error);
+          console.error("Error in image generation process:", error);
+          // Keep the placeholder image in case of error
+          setImageUrl("/placeholder.svg");
         } finally {
           setIsLoading(false);
         }
