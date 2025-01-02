@@ -33,8 +33,9 @@ export default function EquipmentSection({ equipment }: EquipmentSectionProps) {
           </div>
           <Button 
             onClick={() => window.open(item.affiliateUrl, '_blank')}
-            className="bg-[#9b87f5] hover:bg-[#7E69AB]"
+            className="bg-[#F97316] hover:bg-[#EA580C] transition-colors duration-200"
           >
+            <ShoppingBag className="mr-2 h-4 w-4" />
             View on Amazon
           </Button>
         </div>

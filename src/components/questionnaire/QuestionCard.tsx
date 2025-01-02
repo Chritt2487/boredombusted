@@ -24,11 +24,11 @@ export default function QuestionCard({
     // Automatically proceed after a short delay
     setTimeout(() => {
       onNext();
-    }, 500); // 500ms delay for better UX
+    }, 800); // Increased delay for better animation visibility
   };
 
   return (
-    <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
+    <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm animate-fade-in">
       <CardHeader>
         <CardTitle className="text-2xl text-center text-[#7E69AB]">
           {title}
@@ -44,9 +44,9 @@ export default function QuestionCard({
             <div
               key={option}
               onClick={() => handleOptionSelect(option)}
-              className={`flex items-center space-x-2 p-4 rounded-lg border-2 transition-colors duration-200 cursor-pointer ${
+              className={`flex items-center space-x-2 p-4 rounded-lg border-2 transition-all duration-300 cursor-pointer hover:scale-[1.02] ${
                 selectedValue === option
-                  ? "border-[#9b87f5] bg-[#F1F0FB]"
+                  ? "border-[#9b87f5] bg-[#F1F0FB] scale-[1.02] shadow-md"
                   : "border-[#D6BCFA] hover:bg-[#F1F0FB]"
               }`}
             >
