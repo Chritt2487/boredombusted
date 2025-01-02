@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 interface CommunitySectionProps {
   community: {
@@ -18,6 +22,35 @@ interface CommunitySectionProps {
 }
 
 export default function CommunitySection({ community }: CommunitySectionProps) {
+  const [zipcode, setZipcode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleSearch = async () => {
+    if (!zipcode.match(/^\d{5}$/)) {
+      toast({
+        title: "Invalid Zipcode",
+        description: "Please enter a valid 5-digit zipcode",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`https://api.example.com/search?zipcode=${zipcode}`);
+      // Implementation for actual API call would go here
+      toast({
+        title: "Coming Soon",
+        description: "Location-based search will be available soon!",
+      });
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
       <CardHeader>
@@ -26,6 +59,23 @@ export default function CommunitySection({ community }: CommunitySectionProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="flex gap-2">
+          <Input
+            type="text"
+            placeholder="Enter zipcode to find nearby activities"
+            value={zipcode}
+            onChange={(e) => setZipcode(e.target.value)}
+            className="max-w-[200px]"
+          />
+          <Button 
+            onClick={handleSearch}
+            disabled={loading}
+            className="bg-[#9b87f5] hover:bg-[#7E69AB]"
+          >
+            Search
+          </Button>
+        </div>
+
         <div className="grid gap-4">
           {community.groups.map((group, index) => (
             <div key={index} className="p-4 rounded-lg bg-[#F1F0FB]">
@@ -41,20 +91,6 @@ export default function CommunitySection({ community }: CommunitySectionProps) {
               </a>
             </div>
           ))}
-        </div>
-
-        <div className="p-4 rounded-lg bg-[#F1F0FB]">
-          <h3 className="font-semibold text-[#7E69AB] mb-2">Popular Hashtags</h3>
-          <div className="flex flex-wrap gap-2">
-            {community.hashtags.map((hashtag, index) => (
-              <span 
-                key={index}
-                className="px-3 py-1 bg-[#E5DEFF] rounded-full text-[#7E69AB] text-sm"
-              >
-                #{hashtag}
-              </span>
-            ))}
-          </div>
         </div>
 
         {community.events.length > 0 && (

@@ -41,14 +41,15 @@ serve(async (req) => {
     const prompt = `Generate detailed information about the activity "${activityName}". Return ONLY a JSON object with no markdown formatting or additional text. The JSON should follow this structure:
 
     {
-      "difficulty": "A clear difficulty level (beginner/intermediate/advanced) with explanation",
-      "timeCommitment": "Realistic time commitment including setup and practice time",
-      "costEstimate": "Detailed cost breakdown including initial and ongoing expenses",
+      "difficulty": "A clear difficulty level with explanation (use **bold** for key terms)",
+      "timeCommitment": "Realistic time commitment including setup and practice time (use **bold** for key numbers and time periods)",
+      "costEstimate": "Detailed cost breakdown including initial and ongoing expenses (use **bold** for prices and key terms)",
       "equipment": [
         {
           "name": "Specific item name",
           "description": "Detailed description of why this item is needed",
-          "price": "Estimated price range"
+          "price": "Estimated price range",
+          "category": "required/recommended/professional"
         }
       ],
       "locations": [
@@ -78,8 +79,7 @@ serve(async (req) => {
             "description": "Brief description",
             "date": "Upcoming or recurring schedule"
           }
-        ],
-        "hashtags": ["Relevant and active hashtags"]
+        ]
       },
       "alternatives": [
         {
