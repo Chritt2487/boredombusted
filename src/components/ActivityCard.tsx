@@ -1,10 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Activity } from "./ResultsDisplay";
 
 interface ActivityCardProps {
-  activity: Activity;
-  onSelect: (activity: Activity) => void;
+  activity: {
+    name: string;
+    description: string;
+    imageUrl: string;
+    tips: string[];
+  };
+  onSelect: (activity: any) => void;
 }
 
 // Helper function to get emoji based on activity name

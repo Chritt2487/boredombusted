@@ -47,38 +47,37 @@ const Index = () => {
               {[
                 {
                   value: "Find a new hobby",
-                  icon: "photo-1486312338219-ce68d2c6f44d",
+                  icon: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&auto=format&fit=crop&q=60",
                   description: "Discover exciting new hobbies tailored to your interests"
                 },
                 {
                   value: "Do something near me",
-                  icon: "photo-1518770660439-4636190af475",
+                  icon: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&auto=format&fit=crop&q=60",
                   description: "Explore activities and events in your area"
                 },
                 {
                   value: "Learn a skill",
-                  icon: "photo-1498050108023-c5249f4df085",
+                  icon: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&auto=format&fit=crop&q=60",
                   description: "Master new skills with personalized learning paths"
                 },
                 {
                   value: "Try something new",
-                  icon: "photo-1649972904349-6e44c42644a7",
+                  icon: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&auto=format&fit=crop&q=60",
                   description: "Step out of your comfort zone with exciting experiences"
                 },
                 {
                   value: "Surprise me",
-                  icon: "photo-1605810230434-7631ac76ec81",
+                  icon: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&auto=format&fit=crop&q=60",
                   description: "Let us suggest something unexpected and fun"
                 },
               ].map((option) => (
                 <div
                   key={option.value}
                   className="flex items-center space-x-4 p-4 rounded-lg border border-[#D6BCFA] hover:bg-[#F1F0FB] cursor-pointer transition-colors duration-200"
-                  onClick={() => handleOptionSelect(option.value)}
                 >
                   <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden">
                     <img 
-                      src={`https://images.unsplash.com/${option.icon}?w=400&auto=format&fit=crop&q=60`}
+                      src={option.icon} 
                       alt={option.value}
                       className="w-full h-full object-cover"
                     />
