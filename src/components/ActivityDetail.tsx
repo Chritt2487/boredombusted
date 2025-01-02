@@ -46,6 +46,19 @@ interface DetailedActivity {
   };
 }
 
+const getActivityImage = (activityName: string) => {
+  const imageMap: { [key: string]: string } = {
+    "Hiking": "https://images.unsplash.com/photo-1551632811-561732d1e306",
+    "Picnicking in the Park": "https://images.unsplash.com/photo-1526307616774-60d0098f7642",
+    "Geocaching": "https://images.unsplash.com/photo-1578674473215-9f63c76c6fe4",
+    "Outdoor Yoga": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
+    // Fallback image if activity not found
+    "default": "https://images.unsplash.com/photo-1518770660439-4636190af475"
+  };
+  
+  return imageMap[activityName] || imageMap.default;
+};
+
 export default function ActivityDetail({ activity, onBack, onSelectAlternative }: ActivityDetailProps) {
   const [detailedInfo, setDetailedInfo] = useState<DetailedActivity | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,6 +67,7 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
   useEffect(() => {
     const fetchDetailedInfo = async () => {
       try {
+        console.log("Fetching details for activity:", activity.name);
         const { data, error } = await supabase.functions.invoke('get-activity-details', {
           body: { activityName: activity.name }
         });
@@ -103,9 +117,15 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
     );
   }
 
+  const activityImage = getActivityImage(activity.name);
+
   return (
     <div className="space-y-8">
-      <HeroSection name={activity.name} onBack={onBack} />
+      <HeroSection 
+        name={activity.name} 
+        onBack={onBack} 
+        imageUrl={activityImage}
+      />
       
       <OverviewSection 
         description={activity.description}
