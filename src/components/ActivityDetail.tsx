@@ -12,51 +12,137 @@ import GettingStartedSection from "./sections/GettingStartedSection";
 import BenefitsSection from "./sections/BenefitsSection";
 import LoadingState from "./sections/LoadingState";
 import ErrorState from "./sections/ErrorState";
-import { Activity } from "./questionnaire/activityTypes";
 
 interface ActivityDetailProps {
-  activity: Activity;
+  activity: {
+    name: string;
+    description: string;
+    imageUrl: string;
+    benefits: string[];
+  };
   onBack: () => void;
   onSelectAlternative: (alternative: { name: string; description: string; }) => void;
 }
 
+interface DetailedActivity {
+  equipment: {
+    name: string;
+    description: string;
+    affiliateUrl: string;
+    price: string;
+    category: 'required' | 'optional' | 'recommended';
+  }[];
+  difficulty: string;
+  timeCommitment: string;
+  costEstimate: string;
+  history: string;
+  gettingStarted: {
+    steps: string[];
+    beginnerTips: string[];
+  };
+  benefits: {
+    skills: string[];
+    health: string[];
+    funFacts: string[];
+  };
+}
+
+const getActivityImage = (activityName: string) => {
+  const imageMap: { [key: string]: string } = {
+    "Nature Journaling": "https://images.unsplash.com/photo-1517971053567-8bde93bc6a58?q=80&w=2946&auto=format&fit=crop",
+    "Birdwatching": "https://images.unsplash.com/photo-1621631187029-c1e8f11f9c42?q=80&w=2940&auto=format&fit=crop",
+    "Stargazing": "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2940&auto=format&fit=crop",
+    "Photography Walks": "https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=2936&auto=format&fit=crop",
+    "Hiking": "https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=2940&auto=format&fit=crop",
+    "Picnicking in the Park": "https://images.unsplash.com/photo-1526307616774-60d0098f7642?q=80&w=2940&auto=format&fit=crop",
+    "Geocaching": "https://images.unsplash.com/photo-1578674473215-9f63c76c6fe4?q=80&w=2940&auto=format&fit=crop",
+    "Outdoor Yoga": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2940&auto=format&fit=crop",
+    // Fallback image if activity not found - using a general nature scene
+    "default": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2940&auto=format&fit=crop"
+  };
+  
+  return imageMap[activityName] || imageMap.default;
+};
+
 export default function ActivityDetail({ activity, onBack, onSelectAlternative }: ActivityDetailProps) {
-  const [loading, setLoading] = useState(false);
+  const [detailedInfo, setDetailedInfo] = useState<DetailedActivity | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchDetailedInfo = async () => {
+      try {
+        console.log("Fetching details for activity:", activity.name);
+        const { data, error } = await supabase.functions.invoke('get-activity-details', {
+          body: { activityName: activity.name }
+        });
+
+        if (error) throw error;
+        
+        console.log("Received detailed info:", data);
+        setDetailedInfo(data);
+      } catch (error) {
+        console.error("Error fetching detailed info:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load detailed information. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetailedInfo();
+  }, [activity.name, toast]);
 
   if (loading) {
     return <LoadingState />;
   }
+
+  if (!detailedInfo) {
+    return <ErrorState onBack={onBack} />;
+  }
+
+  const activityImage = getActivityImage(activity.name);
 
   return (
     <div className="space-y-8">
       <HeroSection 
         name={activity.name} 
         onBack={onBack} 
-        imageUrl={activity.imageUrl}
+        imageUrl={activityImage}
       />
       
       <OverviewSection 
         description={activity.description}
-        history={activity.history}
-        difficulty={activity.difficulty}
-        timeCommitment={activity.timeCommitment}
-        costEstimate={activity.costEstimate}
+        history={detailedInfo.history}
+        difficulty={detailedInfo.difficulty}
+        timeCommitment={detailedInfo.timeCommitment}
+        costEstimate={detailedInfo.costEstimate}
       />
 
-      <QuickBenefitsSection funFacts={activity.benefits} />
+      {detailedInfo.benefits?.funFacts && (
+        <QuickBenefitsSection funFacts={detailedInfo.benefits.funFacts} />
+      )}
 
-      <GettingStartedSection 
-        steps={activity.gettingStarted.steps}
-        beginnerTips={activity.gettingStarted.tips}
-      />
+      {detailedInfo.gettingStarted && (
+        <GettingStartedSection 
+          steps={detailedInfo.gettingStarted.steps}
+          beginnerTips={detailedInfo.gettingStarted.beginnerTips}
+        />
+      )}
 
-      <EquipmentSection equipment={activity.equipment} />
+      {detailedInfo.equipment && (
+        <EquipmentSection equipment={detailedInfo.equipment} />
+      )}
 
-      <BenefitsSection 
-        skills={activity.tags.skills}
-        health={activity.benefits}
-      />
+      {(detailedInfo.benefits?.skills || detailedInfo.benefits?.health) && (
+        <BenefitsSection 
+          skills={detailedInfo.benefits.skills}
+          health={detailedInfo.benefits.health}
+        />
+      )}
 
       <TutorialsSection activityName={activity.name} />
 

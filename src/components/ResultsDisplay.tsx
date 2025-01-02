@@ -5,9 +5,7 @@ import ActivityDetail from "./ActivityDetail";
 import LoadingState from "./results/LoadingState";
 import ResultsHeader from "./results/ResultsHeader";
 import ResultsGrid from "./results/ResultsGrid";
-import { Activity } from "./questionnaire/activityTypes";
-import { getTopRecommendations } from "./questionnaire/scoringSystem";
-import { activities } from "@/data/activities";
+import { Activity } from "./results/types";
 
 interface ResultsDisplayProps {
   answers: {
@@ -17,32 +15,36 @@ interface ResultsDisplayProps {
     timeCommitment: string;
     budget: string;
     social: string;
-    competitive?: string;
-    skills?: string;
-    creativity?: string;
-    learningStyle?: string;
     isRandom?: boolean;
   };
 }
 
 export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
-  const [recommendedActivities, setRecommendedActivities] = useState<Activity[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    const getRecommendations = async () => {
+    const fetchRecommendations = async () => {
       try {
-        console.log("Getting recommendations with answers:", answers);
-        const recommendations = getTopRecommendations(activities, answers);
-        console.log("Generated recommendations:", recommendations);
-        setRecommendedActivities(recommendations);
+        const { data, error } = await supabase.functions.invoke('generate-recommendations', {
+          body: { answers }
+        });
+
+        if (error) throw error;
+        
+        console.log("Received recommendations:", data);
+        const activitiesWithBenefits = data.activities.map((activity: any) => ({
+          ...activity,
+          benefits: activity.benefits || []
+        }));
+        setActivities(activitiesWithBenefits);
       } catch (error) {
-        console.error("Error generating recommendations:", error);
+        console.error("Error fetching recommendations:", error);
         toast({
           title: "Error",
-          description: "Failed to generate recommendations. Please try again.",
+          description: "Failed to load recommendations. Please try again.",
           variant: "destructive",
         });
       } finally {
@@ -50,14 +52,17 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
       }
     };
 
-    getRecommendations();
+    fetchRecommendations();
   }, [answers, toast]);
 
   const handleSelectAlternative = (alternative: { name: string; description: string }) => {
-    const newActivity = activities.find(a => a.name === alternative.name);
-    if (newActivity) {
-      setSelectedActivity(newActivity);
-    }
+    const newActivity: Activity = {
+      name: alternative.name,
+      description: alternative.description,
+      imageUrl: "/placeholder.svg",
+      benefits: [],
+    };
+    setSelectedActivity(newActivity);
   };
 
   if (loading) {
@@ -78,8 +83,8 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
     <div className="space-y-8">
       <ResultsHeader />
       <ResultsGrid 
-        activities={recommendedActivities}
-        onSelectActivity={(activity: Activity) => setSelectedActivity(activity)}
+        activities={activities}
+        onSelectActivity={setSelectedActivity}
       />
     </div>
   );

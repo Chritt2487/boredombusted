@@ -1,8 +1,7 @@
 import { useState } from "react";
 import ResultsDisplay from "./ResultsDisplay";
 import QuestionCard from "./questionnaire/QuestionCard";
-import { questions } from "./questionnaire/questionsList";
-import { QuestionField } from "./questionnaire/questionTypes";
+import { questions, QuestionField } from "./questionnaire/questions";
 
 interface QuestionnaireFormProps {
   initialChoice: string;
@@ -42,15 +41,9 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
   }
 
   const handleOptionSelect = (value: string) => {
-    const currentQuestion = questions[currentStep];
-    if (!currentQuestion) {
-      console.error("Question not found for step:", currentStep);
-      return;
-    }
-
     setAnswers((prev) => ({
       ...prev,
-      [currentQuestion.field]: value,
+      [questions[currentStep].field]: value,
     }));
   };
 
@@ -68,18 +61,13 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
   }
 
   const currentQuestion = questions[currentStep];
-  
-  // Add safety check for currentQuestion
-  if (!currentQuestion) {
-    console.error("Question not found for step:", currentStep);
-    return null;
-  }
+  const currentValue = answers[currentQuestion.field as keyof typeof answers] as string;
 
   return (
     <QuestionCard
       title={currentQuestion.title}
       options={currentQuestion.options}
-      selectedValue={answers[currentQuestion.field as keyof typeof answers] as string}
+      selectedValue={currentValue}
       onSelect={handleOptionSelect}
       onNext={handleNext}
       isLastQuestion={currentStep === questions.length - 1}
