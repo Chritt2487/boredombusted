@@ -1,43 +1,23 @@
 import { useState } from "react";
 import ResultsDisplay from "./ResultsDisplay";
 import QuestionCard from "./questionnaire/QuestionCard";
-import { questions, QuestionField } from "./questionnaire/questions";
+import { questions, shouldShowQuestion, getNextQuestion } from "./questionnaire/questions";
+import type { AnswersType } from "./questionnaire/questionTypes";
 
 interface QuestionnaireFormProps {
   initialChoice: string;
 }
 
-type AnswersType = {
-  initialChoice: string;
-  activityType: string;
-  environment: string;
-  competitive: string;
-  skills: string;
-  activityLevel: string;
-  timeCommitment: string;
-  budget: string;
-  social: string;
-  isRandom?: boolean;
-}
-
 export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<AnswersType>({
+  const [answers, setAnswers] = useState<Partial<AnswersType>>({
     initialChoice,
-    activityType: "",
-    environment: "",
-    competitive: "",
-    skills: "",
-    activityLevel: "",
-    timeCommitment: "",
-    budget: "",
-    social: "",
   });
   const [isComplete, setIsComplete] = useState(false);
 
   // If "Surprise me" is selected, skip the questionnaire
   if (initialChoice === "Surprise me") {
-    return <ResultsDisplay answers={{ ...answers, isRandom: true }} />;
+    return <ResultsDisplay answers={{ ...answers as AnswersType, isRandom: true }} />;
   }
 
   const handleOptionSelect = (value: string) => {
@@ -48,16 +28,18 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
   };
 
   const handleNext = () => {
-    if (currentStep < questions.length - 1) {
-      setCurrentStep((prev) => prev + 1);
-    } else {
+    const nextQuestionIndex = getNextQuestion(currentStep, answers);
+    
+    if (nextQuestionIndex === -1) {
       console.log("Collected answers:", answers);
       setIsComplete(true);
+    } else {
+      setCurrentStep(nextQuestionIndex);
     }
   };
 
   if (isComplete) {
-    return <ResultsDisplay answers={answers} />;
+    return <ResultsDisplay answers={answers as AnswersType} />;
   }
 
   const currentQuestion = questions[currentStep];
@@ -70,7 +52,7 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
       selectedValue={currentValue}
       onSelect={handleOptionSelect}
       onNext={handleNext}
-      isLastQuestion={currentStep === questions.length - 1}
+      isLastQuestion={getNextQuestion(currentStep, answers) === -1}
     />
   );
 }

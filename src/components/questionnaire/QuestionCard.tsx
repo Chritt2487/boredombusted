@@ -1,10 +1,11 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { QuestionOption } from "./questionTypes";
 
 interface QuestionCardProps {
   title: string;
-  options: readonly string[];
+  options: QuestionOption[];
   selectedValue: string;
   onSelect: (value: string) => void;
   onNext: () => void;
@@ -24,7 +25,7 @@ export default function QuestionCard({
     // Automatically proceed after a short delay
     setTimeout(() => {
       onNext();
-    }, 800); // Increased delay for better animation visibility
+    }, 800);
   };
 
   return (
@@ -42,18 +43,23 @@ export default function QuestionCard({
         >
           {options.map((option) => (
             <div
-              key={option}
-              onClick={() => handleOptionSelect(option)}
+              key={option.value}
+              onClick={() => handleOptionSelect(option.value)}
               className={`flex items-center space-x-2 p-4 rounded-lg border-2 transition-all duration-300 cursor-pointer hover:scale-[1.02] ${
-                selectedValue === option
+                selectedValue === option.value
                   ? "border-[#9b87f5] bg-[#F1F0FB] scale-[1.02] shadow-md"
                   : "border-[#D6BCFA] hover:bg-[#F1F0FB]"
               }`}
             >
-              <RadioGroupItem value={option} id={option} />
-              <Label htmlFor={option} className="cursor-pointer flex-grow">
-                {option}
-              </Label>
+              <RadioGroupItem value={option.value} id={option.value} />
+              <div className="flex-grow">
+                <Label htmlFor={option.value} className="cursor-pointer">
+                  {option.label}
+                </Label>
+                {option.description && (
+                  <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                )}
+              </div>
             </div>
           ))}
         </RadioGroup>
