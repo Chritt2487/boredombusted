@@ -38,7 +38,7 @@ serve(async (req) => {
     }
 
     // Generate detailed information using GPT-4
-    const prompt = `Generate detailed information about the activity "${activityName}" in this exact JSON format. Include practical, accurate, and engaging information for each section:
+    const prompt = `Generate detailed information about the activity "${activityName}". Return ONLY a JSON object with no markdown formatting or additional text. The JSON should follow this structure:
 
     {
       "difficulty": "A clear difficulty level (beginner/intermediate/advanced) with explanation",
@@ -87,9 +87,7 @@ serve(async (req) => {
           "description": "Why it's a good alternative"
         }
       ]
-    }
-
-    Make sure all information is practical, accurate, and engaging. Include 3-5 items in lists where applicable.`;
+    }`;
 
     console.log('Sending request to OpenAI');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -103,7 +101,7 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert activity recommendation system. Provide detailed, practical information about activities and hobbies. Always return complete, well-formatted JSON.' 
+            content: 'You are an expert activity recommendation system. Provide detailed, practical information about activities and hobbies. Return ONLY valid JSON with no markdown formatting.' 
           },
           { role: 'user', content: prompt }
         ],
@@ -125,24 +123,37 @@ serve(async (req) => {
       throw new Error('Invalid response format from OpenAI');
     }
 
-    const detailedInfo = JSON.parse(data.choices[0].message.content);
+    // Clean the response content to ensure it's valid JSON
+    const cleanContent = data.choices[0].message.content.trim()
+      .replace(/```json\n?|\n?```/g, '') // Remove any markdown code blocks
+      .replace(/^\s*\n/gm, ''); // Remove empty lines
 
-    // Add affiliate links to equipment
-    if (amazonAffiliateKey) {
-      detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
-        ...item,
-        affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
-      }));
+    console.log('Cleaned content:', cleanContent);
+    
+    try {
+      const detailedInfo = JSON.parse(cleanContent);
+
+      // Add affiliate links to equipment
+      if (amazonAffiliateKey) {
+        detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
+          ...item,
+          affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
+        }));
+      }
+
+      // Cache the results
+      activityCache.set(activityName, detailedInfo);
+      console.log("Caching new data for:", activityName);
+
+      return new Response(
+        JSON.stringify(detailedInfo),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      console.error('Content that failed to parse:', cleanContent);
+      throw new Error(`Failed to parse OpenAI response: ${parseError.message}`);
     }
-
-    // Cache the results
-    activityCache.set(activityName, detailedInfo);
-    console.log("Caching new data for:", activityName);
-
-    return new Response(
-      JSON.stringify(detailedInfo),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
     console.error('Error in get-activity-details function:', error);
     return new Response(
