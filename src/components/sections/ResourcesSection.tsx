@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link, Globe, BrandReddit } from "lucide-react";
+import { Link, Globe, MessageSquare } from "lucide-react";
 
 interface Resource {
   name: string;
@@ -59,7 +59,7 @@ export default function ResourcesSection({ activityName }: ResourcesSectionProps
             >
               <div className="flex items-start space-x-3">
                 {resource.type === 'subreddit' ? (
-                  <BrandReddit className="h-5 w-5 text-[#7E69AB] mt-1" />
+                  <MessageSquare className="h-5 w-5 text-[#7E69AB] mt-1" />
                 ) : (
                   <Globe className="h-5 w-5 text-[#7E69AB] mt-1" />
                 )}
