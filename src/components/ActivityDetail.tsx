@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star, Clock, DollarSign, Brain, Heart, Users } from "lucide-react";
+import { ArrowLeft, Star, Clock, DollarSign, Brain } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import TutorialsSection from "./sections/TutorialsSection";
 import EquipmentSection from "./sections/EquipmentSection";
-import LocationsSection from "./sections/LocationsSection";
-import AlternativesSection from "./sections/AlternativesSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ActivityDetailProps {
@@ -14,10 +12,9 @@ interface ActivityDetailProps {
     name: string;
     description: string;
     imageUrl: string;
-    tips: string[];
+    benefits: string[];
   };
   onBack: () => void;
-  onSelectAlternative: (alternative: { name: string; description: string }) => void;
 }
 
 interface DetailedActivity {
@@ -26,16 +23,7 @@ interface DetailedActivity {
     description: string;
     affiliateUrl: string;
     price: string;
-  }[];
-  locations?: {
-    name: string;
-    description: string;
-    address: string;
-    rating: number;
-  }[];
-  alternatives: {
-    name: string;
-    description: string;
+    category: 'required' | 'optional' | 'recommended';
   }[];
   difficulty: string;
   timeCommitment: string;
@@ -48,12 +36,11 @@ interface DetailedActivity {
   benefits: {
     skills: string[];
     health: string[];
+    funFacts: string[];
   };
-  variations: string[];
-  pairingActivities: string[];
 }
 
-export default function ActivityDetail({ activity, onBack, onSelectAlternative }: ActivityDetailProps) {
+export default function ActivityDetail({ activity, onBack }: ActivityDetailProps) {
   const [detailedInfo, setDetailedInfo] = useState<DetailedActivity | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -88,6 +75,10 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
     return <div>Loading...</div>;
   }
 
+  const boldKeywords = (text: string) => {
+    return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  };
+
   return (
     <div className="space-y-8">
       <Button 
@@ -101,7 +92,7 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
       {/* Hero Section */}
       <div className="relative h-64 rounded-xl overflow-hidden">
         <img
-          src={activity.imageUrl || "/placeholder.svg"}
+          src={`https://source.unsplash.com/featured/?${encodeURIComponent(activity.name)}`}
           alt={activity.name}
           className="w-full h-full object-cover"
         />
@@ -118,11 +109,11 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="prose max-w-none">
-            <p className="text-gray-700">{activity.description}</p>
+            <div dangerouslySetInnerHTML={{ __html: boldKeywords(activity.description) }} className="text-gray-700" />
             {detailedInfo.history && (
               <div className="mt-4">
                 <h3 className="text-lg font-semibold text-[#7E69AB]">History & Fun Facts</h3>
-                <p className="text-gray-700">{detailedInfo.history}</p>
+                <div dangerouslySetInnerHTML={{ __html: boldKeywords(detailedInfo.history) }} className="text-gray-700" />
               </div>
             )}
           </div>
@@ -154,6 +145,22 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
         </CardContent>
       </Card>
 
+      {/* Quick Benefits Section */}
+      <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-[#7E69AB]">Why You'll Love It</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ul className="list-disc list-inside space-y-2">
+            {detailedInfo.benefits.funFacts.map((fact, index) => (
+              <li key={index} className="text-gray-700">
+                <div dangerouslySetInnerHTML={{ __html: boldKeywords(fact) }} />
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+
       {/* Getting Started Section */}
       <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
         <CardHeader>
@@ -164,7 +171,9 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
             <h3 className="font-semibold text-[#7E69AB]">Step-by-Step Guide</h3>
             <ol className="list-decimal list-inside space-y-2">
               {detailedInfo.gettingStarted.steps.map((step, index) => (
-                <li key={index} className="text-gray-700">{step}</li>
+                <li key={index} className="text-gray-700">
+                  <div dangerouslySetInnerHTML={{ __html: boldKeywords(step) }} />
+                </li>
               ))}
             </ol>
           </div>
@@ -172,7 +181,9 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
             <h3 className="font-semibold text-[#7E69AB]">Tips for Beginners</h3>
             <ul className="list-disc list-inside space-y-2">
               {detailedInfo.gettingStarted.beginnerTips.map((tip, index) => (
-                <li key={index} className="text-gray-700">{tip}</li>
+                <li key={index} className="text-gray-700">
+                  <div dangerouslySetInnerHTML={{ __html: boldKeywords(tip) }} />
+                </li>
               ))}
             </ul>
           </div>
@@ -195,7 +206,9 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
               <h3 className="font-semibold text-[#7E69AB]">Skills Developed</h3>
               <ul className="list-disc list-inside space-y-2">
                 {detailedInfo.benefits.skills.map((skill, index) => (
-                  <li key={index} className="text-gray-700">{skill}</li>
+                  <li key={index} className="text-gray-700">
+                    <div dangerouslySetInnerHTML={{ __html: boldKeywords(skill) }} />
+                  </li>
                 ))}
               </ul>
             </div>
@@ -203,36 +216,9 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
               <h3 className="font-semibold text-[#7E69AB]">Health Benefits</h3>
               <ul className="list-disc list-inside space-y-2">
                 {detailedInfo.benefits.health.map((benefit, index) => (
-                  <li key={index} className="text-gray-700">{benefit}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Variations and Pairing Activities */}
-      <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center text-[#7E69AB]">
-            <Users className="mr-2" /> Variations and Related Activities
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h3 className="font-semibold text-[#7E69AB]">Activity Variations</h3>
-              <ul className="list-disc list-inside space-y-2">
-                {detailedInfo.variations.map((variation, index) => (
-                  <li key={index} className="text-gray-700">{variation}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h3 className="font-semibold text-[#7E69AB]">Pairing Activities</h3>
-              <ul className="list-disc list-inside space-y-2">
-                {detailedInfo.pairingActivities.map((activity, index) => (
-                  <li key={index} className="text-gray-700">{activity}</li>
+                  <li key={index} className="text-gray-700">
+                    <div dangerouslySetInnerHTML={{ __html: boldKeywords(benefit) }} />
+                  </li>
                 ))}
               </ul>
             </div>
@@ -243,16 +229,15 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
       {/* Learning Resources Section */}
       <TutorialsSection activityName={activity.name} />
 
-      {/* Locations Section */}
-      {detailedInfo.locations && (
-        <LocationsSection locations={detailedInfo.locations} />
-      )}
-
-      {/* Alternative Activities Section */}
-      <AlternativesSection 
-        alternatives={detailedInfo.alternatives} 
-        onSelectAlternative={onSelectAlternative}
-      />
+      {/* Back to Results Button */}
+      <div className="flex justify-center">
+        <Button 
+          onClick={onBack}
+          className="bg-[#9b87f5] hover:bg-[#7E69AB]"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to All Activities
+        </Button>
+      </div>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 interface QuestionCardProps {
   title: string;
-  options: readonly string[];  // Changed from string[] to readonly string[]
+  options: readonly string[];
   selectedValue: string;
   onSelect: (value: string) => void;
   onNext: () => void;
@@ -36,7 +36,12 @@ export default function QuestionCard({
           {options.map((option) => (
             <div
               key={option}
-              className="flex items-center space-x-2 p-4 rounded-lg border border-[#D6BCFA] hover:bg-[#F1F0FB] cursor-pointer transition-colors duration-200"
+              onClick={() => onSelect(option)}
+              className={`flex items-center space-x-2 p-4 rounded-lg border-2 transition-colors duration-200 cursor-pointer ${
+                selectedValue === option
+                  ? "border-[#9b87f5] bg-[#F1F0FB]"
+                  : "border-[#D6BCFA] hover:bg-[#F1F0FB]"
+              }`}
             >
               <RadioGroupItem value={option} id={option} />
               <Label htmlFor={option} className="cursor-pointer flex-grow">
