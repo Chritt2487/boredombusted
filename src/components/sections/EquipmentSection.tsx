@@ -14,17 +14,17 @@ export default function EquipmentSection({ equipment }: EquipmentSectionProps) {
   
   useEffect(() => {
     const getAffiliateId = async () => {
-      const { data: { secret }, error } = await supabase.rpc('get_secret', { 
+      const { data, error } = await supabase.rpc('get_secret', { 
         name: 'AMAZON_AFFILIATE_KEY' 
-      });
+      }) as { data: string | null, error: Error | null };
       
       if (error) {
         console.error('Error fetching affiliate ID:', error);
         return;
       }
       
-      if (secret) {
-        setAffiliateId(secret);
+      if (data) {
+        setAffiliateId(data);
       }
     };
 
