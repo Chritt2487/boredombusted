@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 interface QuestionCardProps {
   title: string;
-  options: string[];
+  options: readonly string[];  // Changed from string[] to readonly string[]
   selectedValue: string;
   onSelect: (value: string) => void;
   onNext: () => void;
