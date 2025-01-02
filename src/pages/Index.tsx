@@ -47,28 +47,28 @@ const Index = () => {
               {[
                 {
                   value: "Find a new hobby",
-                  icon: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&auto=format&fit=crop&q=60",
+                  icon: "https://images.unsplash.com/photo-1472289065668-ce650ac443d2?w=400&auto=format&fit=crop&q=60",
                   description: "Discover exciting new hobbies tailored to your interests"
                 },
                 {
                   value: "Do something near me",
-                  icon: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&auto=format&fit=crop&q=60",
+                  icon: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=400&auto=format&fit=crop&q=60",
                   description: "Explore activities and events in your area"
                 },
                 {
                   value: "Learn a skill",
-                  icon: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&auto=format&fit=crop&q=60",
+                  icon: "https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=400&auto=format&fit=crop&q=60",
                   description: "Master new skills with personalized learning paths"
                 },
                 {
                   value: "Try something new",
-                  icon: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&auto=format&fit=crop&q=60",
+                  icon: "https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?w=400&auto=format&fit=crop&q=60",
                   description: "Step out of your comfort zone with exciting experiences"
                 },
                 {
                   value: "Surprise me",
-                  icon: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&auto=format&fit=crop&q=60",
-                  description: "Let us suggest something unexpected and fun"
+                  icon: "https://images.unsplash.com/photo-1522403236043-29876aa85962?w=400&auto=format&fit=crop&q=60",
+                  description: "Get a random activity suggestion right away"
                 },
               ].map((option) => (
                 <div

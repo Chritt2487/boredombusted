@@ -21,6 +21,11 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
   });
   const [isComplete, setIsComplete] = useState(false);
 
+  // If "Surprise me" is selected, skip the questionnaire
+  if (initialChoice === "Surprise me") {
+    return <ResultsDisplay answers={{ ...answers, isRandom: true }} />;
+  }
+
   const questions = [
     {
       title: "Where would you prefer to spend your time?",

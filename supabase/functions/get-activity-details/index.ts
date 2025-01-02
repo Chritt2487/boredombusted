@@ -1,11 +1,50 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
+const defaultActivity = {
+  equipment: [
+    {
+      name: "Basic Art Supplies",
+      description: "A starter set of art supplies for beginners",
+      price: "$20-30",
+      affiliateUrl: "https://amazon.com/s?k=art+supplies+set"
+    }
+  ],
+  locations: [
+    {
+      name: "Local Community Center",
+      description: "Many community centers offer art classes and workspace",
+      address: "Check your local community center",
+      rating: 4.5
+    }
+  ],
+  alternatives: [
+    {
+      name: "Digital Art",
+      description: "Create art using digital tools and software"
+    }
+  ],
+  difficulty: "Beginner",
+  timeCommitment: "1-2 hours per session",
+  costEstimate: "$50-100 to start",
+  history: "Art has been a form of human expression for thousands of years",
+  gettingStarted: {
+    steps: ["Gather basic supplies", "Start with simple exercises", "Practice regularly"],
+    beginnerTips: ["Don't aim for perfection", "Learn basic techniques first", "Join a community"]
+  },
+  benefits: {
+    skills: ["Creativity", "Hand-eye coordination", "Patience"],
+    health: ["Stress relief", "Improved focus", "Self-expression"]
+  },
+  variations: ["Sketching", "Painting", "Mixed media"],
+  pairingActivities: ["Photography", "Crafting", "Meditation"]
 };
 
 serve(async (req) => {
@@ -21,11 +60,24 @@ serve(async (req) => {
       throw new Error('OpenAI API key is not configured');
     }
 
-    const { activityName } = await req.json();
-    console.log("Processing request for activity:", activityName);
+    const { activityName, isRandom } = await req.json();
+    console.log("Processing request for activity:", activityName, "isRandom:", isRandom);
     
     if (!activityName) {
       throw new Error('Activity name is required');
+    }
+
+    // If isRandom is true, return a modified version of the default activity
+    if (isRandom) {
+      console.log("Returning random activity");
+      return new Response(
+        JSON.stringify({
+          ...defaultActivity,
+          name: "Random Creative Activity",
+          description: "A fun and engaging creative activity to try"
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const prompt = `Generate detailed information about the activity "${activityName}" in the following JSON format:
@@ -78,7 +130,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4',
         messages: [
           { 
             role: 'system', 
