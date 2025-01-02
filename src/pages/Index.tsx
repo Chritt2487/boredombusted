@@ -4,6 +4,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import QuestionnaireForm from "@/components/QuestionnaireForm";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const Index = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -24,12 +25,12 @@ const Index = () => {
     <div className="min-h-screen p-4 bg-gradient-to-b from-purple-50 to-white">
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Hero Section */}
-        <div className="text-center space-y-4 mb-8">
+        <div className="text-center space-y-4 mb-8 animate-fade-in">
           <h1 className="text-4xl font-bold text-[#9b87f5]">Discover Your Next Adventure</h1>
           <p className="text-gray-600">Let's find the perfect activity that matches your interests</p>
         </div>
 
-        <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
+        <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm animate-fade-in">
           <CardHeader className="space-y-2">
             <CardTitle className="text-2xl text-center text-[#7E69AB]">
               What are you looking to do?
@@ -104,10 +105,12 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        {showForm && <QuestionnaireForm initialChoice={selectedOption} />}
+        <ErrorBoundary>
+          {showForm && <QuestionnaireForm initialChoice={selectedOption} />}
+        </ErrorBoundary>
       </div>
     </div>
   );
-};
+}
 
 export default Index;
