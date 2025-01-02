@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useActivityImage } from "@/hooks/useActivityImage";
 
 interface ActivityCardProps {
   activity: {
@@ -18,67 +17,7 @@ interface ActivityCardProps {
 }
 
 export default function ActivityCard({ activity, onSelect }: ActivityCardProps) {
-  const [imageUrl, setImageUrl] = useState<string>(activity.imageUrl);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const generateImage = async () => {
-      if (!activity.imageUrl || activity.imageUrl === "/placeholder.svg") {
-        setIsLoading(true);
-        try {
-          // First check if we already have an image stored
-          const { data: existingImage, error: fetchError } = await supabase
-            .from('activity_images')
-            .select('image_url')
-            .eq('activity_name', activity.name)
-            .maybeSingle();
-
-          if (fetchError) {
-            console.error("Error fetching image:", fetchError);
-            throw fetchError;
-          }
-
-          if (existingImage) {
-            setImageUrl(existingImage.image_url);
-          } else {
-            // Generate new image if none exists
-            const { data, error } = await supabase.functions.invoke('generate-activity-image', {
-              body: { activityName: activity.name }
-            });
-
-            if (error) {
-              console.error("Error generating image:", error);
-              throw error;
-            }
-
-            if (data?.image) {
-              // Store the generated image URL
-              const { error: insertError } = await supabase
-                .from('activity_images')
-                .insert([
-                  { activity_name: activity.name, image_url: data.image }
-                ]);
-
-              if (insertError) {
-                console.error("Error storing image URL:", insertError);
-                throw insertError;
-              }
-
-              setImageUrl(data.image);
-            }
-          }
-        } catch (error) {
-          console.error("Error in image generation process:", error);
-          // Keep the placeholder image in case of error
-          setImageUrl("/placeholder.svg");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    generateImage();
-  }, [activity.name, activity.imageUrl]);
+  const { imageUrl, isLoading } = useActivityImage(activity.name, activity.imageUrl);
 
   return (
     <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow duration-200">
