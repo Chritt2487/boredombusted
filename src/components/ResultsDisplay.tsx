@@ -35,17 +35,9 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
     const getRecommendations = async () => {
       try {
         console.log("Getting recommendations with answers:", answers);
-        
-        if (answers.isRandom) {
-          // For random selection, shuffle the activities array and take the first 4
-          const shuffled = [...activities].sort(() => Math.random() - 0.5);
-          setRecommendedActivities(shuffled.slice(0, 4));
-        } else {
-          // Use the scoring system to get recommendations
-          const recommendations = getTopRecommendations(activities, answers);
-          console.log("Generated recommendations:", recommendations);
-          setRecommendedActivities(recommendations);
-        }
+        const recommendations = getTopRecommendations(activities, answers);
+        console.log("Generated recommendations:", recommendations);
+        setRecommendedActivities(recommendations);
       } catch (error) {
         console.error("Error generating recommendations:", error);
         toast({
@@ -87,7 +79,7 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
       <ResultsHeader />
       <ResultsGrid 
         activities={recommendedActivities}
-        onSelectActivity={setSelectedActivity}
+        onSelectActivity={(activity: Activity) => setSelectedActivity(activity)}
       />
     </div>
   );

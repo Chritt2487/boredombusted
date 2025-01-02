@@ -13,6 +13,7 @@ export interface Activity {
   description: string;
   shortDescription: string;
   imageUrl: string;
+  history?: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced' | 'All Levels';
   timeCommitment: string;
   costEstimate: string;
