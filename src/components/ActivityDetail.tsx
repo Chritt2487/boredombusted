@@ -28,6 +28,7 @@ interface DetailedActivity {
     description: string;
     affiliateUrl: string;
     price: string;
+    category: 'required' | 'recommended' | 'professional';
   }[];
   locations?: {
     name: string;
@@ -76,8 +77,17 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
 
         if (error) throw error;
         
-        console.log("Received detailed info:", data);
-        setDetailedInfo(data);
+        // Add default category if not present
+        const processedData = {
+          ...data,
+          equipment: data.equipment.map((item: any) => ({
+            ...item,
+            category: item.category || 'recommended' // Default to 'recommended' if category is missing
+          }))
+        };
+        
+        console.log("Received detailed info:", processedData);
+        setDetailedInfo(processedData);
       } catch (error) {
         console.error("Error fetching detailed info:", error);
         toast({
