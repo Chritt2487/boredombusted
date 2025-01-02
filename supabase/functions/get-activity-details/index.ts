@@ -38,47 +38,58 @@ serve(async (req) => {
     }
 
     // Generate detailed information using GPT-4
-    const prompt = `For the activity "${activityName}", generate detailed information in this exact JSON format:
+    const prompt = `Generate detailed information about the activity "${activityName}" in this exact JSON format. Include practical, accurate, and engaging information for each section:
+
     {
-      "difficulty": "beginner/intermediate/advanced",
-      "timeCommitment": "average time needed",
-      "costEstimate": "startup and ongoing costs",
+      "difficulty": "A clear difficulty level (beginner/intermediate/advanced) with explanation",
+      "timeCommitment": "Realistic time commitment including setup and practice time",
+      "costEstimate": "Detailed cost breakdown including initial and ongoing expenses",
       "equipment": [
         {
-          "name": "item name",
-          "description": "brief description",
-          "price": "estimated price"
+          "name": "Specific item name",
+          "description": "Detailed description of why this item is needed",
+          "price": "Estimated price range"
+        }
+      ],
+      "locations": [
+        {
+          "name": "Location name",
+          "description": "Brief description",
+          "address": "General address or area",
+          "rating": 4.5
         }
       ],
       "benefits": {
-        "skills": ["list of skills developed"],
-        "health": ["list of health benefits"],
-        "social": ["list of social benefits"]
+        "skills": ["List specific skills developed"],
+        "health": ["List concrete health benefits"],
+        "social": ["List social advantages"]
       },
       "community": {
         "groups": [
           {
-            "name": "group name",
-            "description": "brief description",
-            "link": "website link"
+            "name": "Group name",
+            "description": "Brief description",
+            "link": "Valid URL to join"
           }
         ],
         "events": [
           {
-            "name": "event name",
-            "description": "brief description",
-            "date": "upcoming date or recurring"
+            "name": "Event name",
+            "description": "Brief description",
+            "date": "Upcoming or recurring schedule"
           }
         ],
-        "hashtags": ["relevant hashtags"]
+        "hashtags": ["Relevant and active hashtags"]
       },
       "alternatives": [
         {
-          "name": "alternative activity name",
-          "description": "brief description why it's similar"
+          "name": "Similar activity name",
+          "description": "Why it's a good alternative"
         }
       ]
-    }`;
+    }
+
+    Make sure all information is practical, accurate, and engaging. Include 3-5 items in lists where applicable.`;
 
     console.log('Sending request to OpenAI');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -88,11 +99,11 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert activity recommendation system. Always return complete, well-formatted JSON.' 
+            content: 'You are an expert activity recommendation system. Provide detailed, practical information about activities and hobbies. Always return complete, well-formatted JSON.' 
           },
           { role: 'user', content: prompt }
         ],
@@ -117,10 +128,12 @@ serve(async (req) => {
     const detailedInfo = JSON.parse(data.choices[0].message.content);
 
     // Add affiliate links to equipment
-    detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
-      ...item,
-      affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
-    }));
+    if (amazonAffiliateKey) {
+      detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
+        ...item,
+        affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
+      }));
+    }
 
     // Cache the results
     activityCache.set(activityName, detailedInfo);
