@@ -3,12 +3,14 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const amazonAffiliateKey = Deno.env.get('AMAZON_AFFILIATE_KEY');
-const googlePlacesApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Cache for storing activity details to reduce API calls
+const activityCache = new Map();
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -18,15 +20,23 @@ serve(async (req) => {
   try {
     const { activityName } = await req.json();
     
+    // Check cache first
+    const cachedData = activityCache.get(activityName);
+    if (cachedData) {
+      console.log("Returning cached data for:", activityName);
+      return new Response(
+        JSON.stringify(cachedData),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Generate detailed information using GPT-4
     const prompt = `For the activity "${activityName}", generate detailed information including:
-    1. 3 tutorial/guide recommendations with titles, descriptions, and video URLs
-    2. 4 essential equipment items with names, descriptions, and approximate prices
-    3. 3 alternative activities that someone might also enjoy
+    1. 3 essential equipment items with names, descriptions, and approximate prices
+    2. 3 alternative activities that someone might also enjoy
     Format as JSON with this structure:
     {
-      "tutorials": [{"title": "", "description": "", "url": ""}],
-      "equipment": [{"name": "", "description": "", "price": "", "affiliateUrl": ""}],
+      "equipment": [{"name": "", "description": "", "price": ""}],
       "alternatives": [{"name": "", "description": ""}]
     }`;
 
@@ -43,7 +53,7 @@ serve(async (req) => {
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: 1000
       }),
     });
 
@@ -54,28 +64,22 @@ serve(async (req) => {
     const gptData = await gptResponse.json();
     const detailedInfo = JSON.parse(gptData.choices[0].message.content);
 
-    // Add affiliate links to equipment (mock implementation)
+    // Add affiliate links to equipment
     detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
       ...item,
       affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
     }));
 
-    // If location data is needed, fetch from Google Places API
-    if (req.headers.get('x-location-enabled') === 'true') {
-      const locationResponse = await fetch(
-        `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(activityName)}&key=${googlePlacesApiKey}`
-      );
-      
-      if (locationResponse.ok) {
-        const locationData = await locationResponse.json();
-        detailedInfo.locations = locationData.results.slice(0, 3).map((place: any) => ({
-          name: place.name,
-          description: place.formatted_address,
-          address: place.formatted_address,
-          rating: place.rating || 0,
-        }));
-      }
-    }
+    // Add YouTube search link for tutorials
+    detailedInfo.tutorials = [{
+      title: `${activityName} Tutorials`,
+      description: `Find helpful tutorials and guides for ${activityName}`,
+      url: `https://www.youtube.com/results?search_query=${encodeURIComponent(activityName)}+tutorial+guide+how+to`,
+    }];
+
+    // Cache the results
+    activityCache.set(activityName, detailedInfo);
+    console.log("Caching new data for:", activityName);
 
     return new Response(
       JSON.stringify(detailedInfo),
