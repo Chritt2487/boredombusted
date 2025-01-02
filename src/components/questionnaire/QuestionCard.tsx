@@ -1,7 +1,6 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 
 interface QuestionCardProps {
   title: string;
@@ -20,6 +19,14 @@ export default function QuestionCard({
   onNext,
   isLastQuestion,
 }: QuestionCardProps) {
+  const handleOptionSelect = (value: string) => {
+    onSelect(value);
+    // Automatically proceed after a short delay
+    setTimeout(() => {
+      onNext();
+    }, 500); // 500ms delay for better UX
+  };
+
   return (
     <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
       <CardHeader>
@@ -30,13 +37,13 @@ export default function QuestionCard({
       <CardContent>
         <RadioGroup
           value={selectedValue}
-          onValueChange={onSelect}
+          onValueChange={handleOptionSelect}
           className="space-y-4"
         >
           {options.map((option) => (
             <div
               key={option}
-              onClick={() => onSelect(option)}
+              onClick={() => handleOptionSelect(option)}
               className={`flex items-center space-x-2 p-4 rounded-lg border-2 transition-colors duration-200 cursor-pointer ${
                 selectedValue === option
                   ? "border-[#9b87f5] bg-[#F1F0FB]"
@@ -50,13 +57,6 @@ export default function QuestionCard({
             </div>
           ))}
         </RadioGroup>
-        <Button
-          onClick={onNext}
-          className="w-full mt-6 bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
-          disabled={!selectedValue}
-        >
-          {isLastQuestion ? "Finish" : "Next"}
-        </Button>
       </CardContent>
     </Card>
   );
