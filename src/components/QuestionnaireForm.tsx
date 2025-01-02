@@ -9,7 +9,10 @@ interface QuestionnaireFormProps {
 
 type AnswersType = {
   initialChoice: string;
+  activityType: string;
   environment: string;
+  competitive: string;
+  skills: string;
   activityLevel: string;
   timeCommitment: string;
   budget: string;
@@ -21,7 +24,10 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<AnswersType>({
     initialChoice,
+    activityType: "",
     environment: "",
+    competitive: "",
+    skills: "",
     activityLevel: "",
     timeCommitment: "",
     budget: "",
