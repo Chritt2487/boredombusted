@@ -1,7 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Heart, Share2 } from "lucide-react";
 import { useActivityImage } from "@/hooks/useActivityImage";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@supabase/auth-helpers-react";
 
 interface ActivityCardProps {
   activity: {
@@ -14,10 +18,86 @@ interface ActivityCardProps {
     benefits?: string[];
   };
   onSelect: (activity: any) => void;
+  isFavorited?: boolean;
+  onFavoriteChange?: () => void;
 }
 
-export default function ActivityCard({ activity, onSelect }: ActivityCardProps) {
+export default function ActivityCard({ 
+  activity, 
+  onSelect, 
+  isFavorited = false,
+  onFavoriteChange 
+}: ActivityCardProps) {
   const { imageUrl, isLoading } = useActivityImage(activity.name, activity.imageUrl);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const { toast } = useToast();
+  const session = useAuth();
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!session?.user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to save favorites",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsTogglingFavorite(true);
+    try {
+      if (isFavorited) {
+        await supabase
+          .from('favorite_activities')
+          .delete()
+          .eq('user_id', session.user.id)
+          .eq('activity_name', activity.name);
+      } else {
+        await supabase
+          .from('favorite_activities')
+          .insert([
+            { user_id: session.user.id, activity_name: activity.name }
+          ]);
+      }
+      
+      if (onFavoriteChange) {
+        onFavoriteChange();
+      }
+      
+      toast({
+        title: isFavorited ? "Removed from favorites" : "Added to favorites",
+        description: `${activity.name} has been ${isFavorited ? 'removed from' : 'added to'} your favorites`,
+      });
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorites. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await navigator.share({
+        title: activity.name,
+        text: activity.description,
+        url: window.location.href,
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback to copying to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link Copied",
+        description: "Activity link has been copied to clipboard",
+      });
+    }
+  };
 
   return (
     <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow duration-200">
@@ -35,7 +115,32 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
             />
           )}
         </div>
-        <CardTitle className="text-xl text-[#7E69AB]">{activity.name}</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xl text-[#7E69AB]">{activity.name}</CardTitle>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleFavoriteClick}
+              disabled={isTogglingFavorite}
+              className={`hover:bg-[#F1F0FB] ${isFavorited ? 'text-red-500' : 'text-gray-500'}`}
+            >
+              {isTogglingFavorite ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Heart className={`h-5 w-5 ${isFavorited ? 'fill-current' : ''}`} />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleShare}
+              className="hover:bg-[#F1F0FB] text-gray-500"
+            >
+              <Share2 className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-gray-600">{activity.description}</p>

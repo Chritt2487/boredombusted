@@ -57,7 +57,6 @@ const getActivityImage = (activityName: string) => {
     "Picnicking in the Park": "https://images.unsplash.com/photo-1526307616774-60d0098f7642?q=80&w=2940&auto=format&fit=crop",
     "Geocaching": "https://images.unsplash.com/photo-1578674473215-9f63c76c6fe4?q=80&w=2940&auto=format&fit=crop",
     "Outdoor Yoga": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2940&auto=format&fit=crop",
-    // Fallback image if activity not found - using a general nature scene
     "default": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2940&auto=format&fit=crop"
   };
   
@@ -67,6 +66,7 @@ const getActivityImage = (activityName: string) => {
 export default function ActivityDetail({ activity, onBack, onSelectAlternative }: ActivityDetailProps) {
   const [detailedInfo, setDetailedInfo] = useState<DetailedActivity | null>(null);
   const [loading, setLoading] = useState(true);
+  const [similarActivities, setSimilarActivities] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -81,6 +81,19 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
         
         console.log("Received detailed info:", data);
         setDetailedInfo(data);
+
+        const { data: similarData, error: similarError } = await supabase.functions.invoke('generate-recommendations', {
+          body: { 
+            answers: {
+              initialChoice: "similar",
+              baseActivity: activity.name
+            }
+          }
+        });
+
+        if (similarError) throw similarError;
+        setSimilarActivities(similarData.activities.slice(0, 3));
+
       } catch (error) {
         console.error("Error fetching detailed info:", error);
         toast({
@@ -142,6 +155,26 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
           skills={detailedInfo.benefits.skills}
           health={detailedInfo.benefits.health}
         />
+      )}
+
+      {similarActivities.length > 0 && (
+        <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-[#7E69AB]">Similar Activities</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            {similarActivities.map((similar, index) => (
+              <div 
+                key={index}
+                className="p-4 rounded-lg bg-[#F1F0FB] hover:bg-[#E5DEFF] transition-colors cursor-pointer"
+                onClick={() => onSelectAlternative(similar)}
+              >
+                <h3 className="font-semibold text-[#7E69AB]">{similar.name}</h3>
+                <p className="text-gray-600">{similar.description}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       )}
 
       <TutorialsSection activityName={activity.name} />

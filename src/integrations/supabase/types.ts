@@ -30,6 +30,27 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_activities: {
+        Row: {
+          activity_name: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_name: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_name?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
