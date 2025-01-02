@@ -55,12 +55,17 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
     fetchRecommendations();
   }, [answers, toast]);
 
+  const handleSelectActivity = (activity: Activity) => {
+    console.log("Selecting activity:", activity);
+    setSelectedActivity(activity);
+  };
+
   const handleSelectAlternative = (alternative: { name: string; description: string }) => {
-    // Create a new activity object from the alternative
+    console.log("Selecting alternative:", alternative);
     const newActivity: Activity = {
       name: alternative.name,
       description: alternative.description,
-      imageUrl: "/placeholder.svg", // Use placeholder image
+      imageUrl: "", // Empty string since we're using emojis now
       tips: [], // Empty tips array as we'll get detailed info from the API
     };
     setSelectedActivity(newActivity);
@@ -97,7 +102,7 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
           <ActivityCard
             key={index}
             activity={activity}
-            onSelect={setSelectedActivity}
+            onSelect={handleSelectActivity}
           />
         ))}
       </div>
