@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { HfInference } from 'https://esm.sh/@huggingface/inference@2.3.2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,22 +13,36 @@ serve(async (req) => {
   try {
     const { activityName } = await req.json()
     
-    const prompt = `A high-quality, vibrant image of ${activityName}, lifestyle photography style, showing people enjoying the activity`
+    const prompt = `A high-quality, vibrant lifestyle photograph showing people enjoying ${activityName}. The image should be well-lit, inspiring, and showcase the activity in an engaging way. Photorealistic style.`
 
-    const hf = new HfInference(Deno.env.get('HUGGING_FACE_ACCESS_TOKEN'))
-    
     console.log('Generating image for:', activityName)
-    
-    const image = await hf.textToImage({
-      inputs: prompt,
-      model: 'black-forest-labs/FLUX.1-schnell',
-    })
+    console.log('Using prompt:', prompt)
 
-    const arrayBuffer = await image.arrayBuffer()
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: "dall-e-3",
+        prompt: prompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+        response_format: "url"
+      })
+    });
+
+    const data = await response.json();
+    console.log('OpenAI response:', data);
+
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
 
     return new Response(
-      JSON.stringify({ image: `data:image/png;base64,${base64}` }),
+      JSON.stringify({ image: data.data[0].url }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
