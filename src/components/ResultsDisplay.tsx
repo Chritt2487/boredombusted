@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import ActivityDetail from "./ActivityDetail";
 
 interface ResultsDisplayProps {
   answers: {
@@ -26,6 +27,7 @@ interface Activity {
 export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,6 +67,15 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
     );
   }
 
+  if (selectedActivity) {
+    return (
+      <ActivityDetail 
+        activity={selectedActivity} 
+        onBack={() => setSelectedActivity(null)} 
+      />
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="text-center">
@@ -97,12 +108,7 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
               </div>
               <Button 
                 className="w-full bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
-                onClick={() => {
-                  toast({
-                    title: "Getting Started",
-                    description: "We're preparing more details about this activity!",
-                  });
-                }}
+                onClick={() => setSelectedActivity(activity)}
               >
                 Learn More
               </Button>
