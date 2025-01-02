@@ -9,7 +9,6 @@ import EquipmentSection from "./sections/EquipmentSection";
 import LocationsSection from "./sections/LocationsSection";
 import AlternativesSection from "./sections/AlternativesSection";
 import BenefitsSection from "./sections/BenefitsSection";
-import CommunitySection from "./sections/CommunitySection";
 
 interface ActivityDetailProps {
   activity: Activity;
@@ -40,6 +39,7 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
         difficulty={detailedInfo.difficulty}
         timeCommitment={detailedInfo.timeCommitment}
         costEstimate={detailedInfo.costEstimate}
+        imageUrl={detailedInfo.imageUrl}
       />
 
       <TutorialsSection activityName={activity.name} />
@@ -51,8 +51,6 @@ export default function ActivityDetail({ activity, onBack, onSelectAlternative }
       )}
 
       <BenefitsSection benefits={detailedInfo.benefits} />
-      
-      <CommunitySection community={detailedInfo.community} />
       
       <AlternativesSection 
         alternatives={detailedInfo.alternatives} 

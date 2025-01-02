@@ -1,85 +1,98 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const amazonAffiliateKey = Deno.env.get('AMAZON_AFFILIATE_KEY');
+const googlePlacesApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Cache for storing activity details to reduce API calls
-const activityCache = new Map();
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+);
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    if (!openAIApiKey) {
-      console.error('OpenAI API key is not set');
-      throw new Error('OpenAI API key is not configured');
-    }
-
-    const { activityName } = await req.json();
+    const { activityName, userLocation } = await req.json();
     console.log('Processing request for activity:', activityName);
-    
-    // Check cache first
-    const cachedData = activityCache.get(activityName);
-    if (cachedData) {
-      console.log("Returning cached data for:", activityName);
-      return new Response(
-        JSON.stringify(cachedData),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+
+    // Check if we already have an image for this activity
+    const { data: existingImage } = await supabase
+      .from('activity_images')
+      .select('image_url')
+      .eq('activity_name', activityName)
+      .single();
+
+    let imageUrl = existingImage?.image_url;
+
+    if (!imageUrl) {
+      // Generate image using DALL-E
+      const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "dall-e-3",
+          prompt: `A high-quality, realistic image of people enjoying ${activityName}. The image should be well-lit, engaging, and showcase the activity in an appealing way.`,
+          n: 1,
+          size: "1024x1024",
+        }),
+      });
+
+      const imageData = await imageResponse.json();
+      imageUrl = imageData.data[0].url;
+
+      // Store the generated image URL
+      await supabase
+        .from('activity_images')
+        .insert([{ activity_name: activityName, image_url: imageUrl }]);
     }
 
-    // Generate detailed information using GPT-4
-    const prompt = `Generate detailed information about the activity "${activityName}". Return ONLY a JSON object with no markdown formatting or additional text. The JSON should follow this structure:
+    // Get nearby locations using Google Places API
+    const placesResponse = await fetch(
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
+      `location=${userLocation.latitude},${userLocation.longitude}&` +
+      `radius=5000&` +
+      `keyword=${encodeURIComponent(activityName)}&` +
+      `key=${googlePlacesApiKey}`
+    );
 
+    const placesData = await placesResponse.json();
+    const locations = placesData.results.slice(0, 3).map((place: any) => ({
+      name: place.name,
+      description: place.vicinity,
+      address: place.formatted_address || place.vicinity,
+      rating: place.rating || 4.0,
+    }));
+
+    // Generate activity details using GPT-4
+    const prompt = `Generate concise information about the activity "${activityName}". Return ONLY a JSON object with no markdown formatting or additional text. Make descriptions brief and focused. The JSON should follow this structure:
     {
-      "difficulty": "A clear difficulty level with explanation (use **bold** for key terms)",
-      "timeCommitment": "Realistic time commitment including setup and practice time (use **bold** for key numbers and time periods)",
-      "costEstimate": "Detailed cost breakdown including initial and ongoing expenses (use **bold** for prices and key terms)",
+      "difficulty": "One short sentence about difficulty level",
+      "timeCommitment": "One short sentence about time needed",
+      "costEstimate": "One short sentence about costs",
       "equipment": [
         {
-          "name": "Specific item name",
-          "description": "Detailed description of why this item is needed",
-          "price": "Estimated price range",
+          "name": "Item name",
+          "description": "Brief description",
+          "price": "Price range",
           "category": "required/recommended/professional"
         }
       ],
-      "locations": [
-        {
-          "name": "Location name",
-          "description": "Brief description",
-          "address": "General address or area",
-          "rating": 4.5
-        }
-      ],
       "benefits": {
-        "skills": ["List specific skills developed"],
-        "health": ["List concrete health benefits"],
+        "skills": ["List specific skills"],
+        "health": ["List health benefits"],
         "social": ["List social advantages"]
-      },
-      "community": {
-        "groups": [
-          {
-            "name": "Group name",
-            "description": "Brief description",
-            "link": "Valid URL to join"
-          }
-        ],
-        "events": [
-          {
-            "name": "Event name",
-            "description": "Brief description",
-            "date": "Upcoming or recurring schedule"
-          }
-        ]
       },
       "alternatives": [
         {
@@ -89,7 +102,6 @@ serve(async (req) => {
       ]
     }`;
 
-    console.log('Sending request to OpenAI');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -101,7 +113,7 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert activity recommendation system. Provide detailed, practical information about activities and hobbies. Return ONLY valid JSON with no markdown formatting.' 
+            content: 'You are an expert activity recommendation system. Provide concise, practical information about activities and hobbies.' 
           },
           { role: 'user', content: prompt }
         ],
@@ -110,50 +122,23 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
       throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Received response from OpenAI');
+    const detailedInfo = JSON.parse(data.choices[0].message.content.trim());
 
-    if (!data.choices?.[0]?.message?.content) {
-      console.error('Invalid response format from OpenAI:', data);
-      throw new Error('Invalid response format from OpenAI');
-    }
+    // Add the generated image and locations to the response
+    const fullResponse = {
+      ...detailedInfo,
+      imageUrl,
+      locations,
+    };
 
-    // Clean the response content to ensure it's valid JSON
-    const cleanContent = data.choices[0].message.content.trim()
-      .replace(/```json\n?|\n?```/g, '') // Remove any markdown code blocks
-      .replace(/^\s*\n/gm, ''); // Remove empty lines
-
-    console.log('Cleaned content:', cleanContent);
-    
-    try {
-      const detailedInfo = JSON.parse(cleanContent);
-
-      // Add affiliate links to equipment
-      if (amazonAffiliateKey) {
-        detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
-          ...item,
-          affiliateUrl: `https://amazon.com/s?k=${encodeURIComponent(item.name)}&tag=${amazonAffiliateKey}`,
-        }));
-      }
-
-      // Cache the results
-      activityCache.set(activityName, detailedInfo);
-      console.log("Caching new data for:", activityName);
-
-      return new Response(
-        JSON.stringify(detailedInfo),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } catch (parseError) {
-      console.error('Error parsing OpenAI response:', parseError);
-      console.error('Content that failed to parse:', cleanContent);
-      throw new Error(`Failed to parse OpenAI response: ${parseError.message}`);
-    }
+    return new Response(
+      JSON.stringify(fullResponse),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
     console.error('Error in get-activity-details function:', error);
     return new Response(
