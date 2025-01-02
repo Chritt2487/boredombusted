@@ -1,6 +1,5 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const googlePlacesApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
@@ -9,11 +8,6 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-const supabase = createClient(
-  Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-);
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -24,39 +18,23 @@ serve(async (req) => {
     const { activityName, userLocation } = await req.json();
     console.log('Processing request for activity:', activityName);
 
-    // Check if we already have an image for this activity
-    const { data: existingImage } = await supabase
-      .from('activity_images')
-      .select('image_url')
-      .eq('activity_name', activityName)
-      .single();
+    // Generate image using DALL-E
+    const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: "dall-e-3",
+        prompt: `A high-quality, realistic image of people enjoying ${activityName}. The image should be well-lit, engaging, and showcase the activity in an appealing way.`,
+        n: 1,
+        size: "1024x1024",
+      }),
+    });
 
-    let imageUrl = existingImage?.image_url;
-
-    if (!imageUrl) {
-      // Generate image using DALL-E
-      const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: "dall-e-3",
-          prompt: `A high-quality, realistic image of people enjoying ${activityName}. The image should be well-lit, engaging, and showcase the activity in an appealing way.`,
-          n: 1,
-          size: "1024x1024",
-        }),
-      });
-
-      const imageData = await imageResponse.json();
-      imageUrl = imageData.data[0].url;
-
-      // Store the generated image URL
-      await supabase
-        .from('activity_images')
-        .insert([{ activity_name: activityName, image_url: imageUrl }]);
-    }
+    const imageData = await imageResponse.json();
+    const imageUrl = imageData.data[0].url;
 
     // Get nearby locations using Google Places API
     const placesResponse = await fetch(

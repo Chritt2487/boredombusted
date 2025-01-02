@@ -58,4 +58,5 @@ export interface DetailedActivity {
   costEstimate: string;
   benefits: Benefits;
   community: Community;
+  imageUrl: string;
 }
