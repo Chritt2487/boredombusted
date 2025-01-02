@@ -30,7 +30,8 @@ export default function LocationsSection({ locations }: LocationsSectionProps) {
     }
   }, []);
 
-  if (!userLocation) {
+  // If no locations are provided or user location is not available, don't render the section
+  if (!locations?.length || !userLocation) {
     return null;
   }
 

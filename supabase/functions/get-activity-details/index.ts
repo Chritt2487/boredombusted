@@ -17,6 +17,7 @@ serve(async (req) => {
   try {
     const { activityName, userLocation } = await req.json();
     console.log('Processing request for activity:', activityName);
+    console.log('User location data:', userLocation);
 
     // Generate image using DALL-E
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
@@ -36,22 +37,28 @@ serve(async (req) => {
     const imageData = await imageResponse.json();
     const imageUrl = imageData.data[0].url;
 
-    // Get nearby locations using Google Places API
-    const placesResponse = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
-      `location=${userLocation.latitude},${userLocation.longitude}&` +
-      `radius=5000&` +
-      `keyword=${encodeURIComponent(activityName)}&` +
-      `key=${googlePlacesApiKey}`
-    );
+    // Only fetch locations if we have valid user location data
+    let locations = [];
+    if (userLocation && userLocation.latitude && userLocation.longitude) {
+      console.log('Fetching nearby locations...');
+      const placesResponse = await fetch(
+        `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
+        `location=${userLocation.latitude},${userLocation.longitude}&` +
+        `radius=5000&` +
+        `keyword=${encodeURIComponent(activityName)}&` +
+        `key=${googlePlacesApiKey}`
+      );
 
-    const placesData = await placesResponse.json();
-    const locations = placesData.results.slice(0, 3).map((place: any) => ({
-      name: place.name,
-      description: place.vicinity,
-      address: place.formatted_address || place.vicinity,
-      rating: place.rating || 4.0,
-    }));
+      const placesData = await placesResponse.json();
+      locations = placesData.results.slice(0, 3).map((place: any) => ({
+        name: place.name,
+        description: place.vicinity,
+        address: place.formatted_address || place.vicinity,
+        rating: place.rating || 4.0,
+      }));
+    } else {
+      console.log('No user location provided, skipping location search');
+    }
 
     // Generate activity details using GPT-4
     const prompt = `Generate concise information about the activity "${activityName}". Return ONLY a JSON object with no markdown formatting or additional text. Make descriptions brief and focused. The JSON should follow this structure:
@@ -110,7 +117,7 @@ serve(async (req) => {
     const fullResponse = {
       ...detailedInfo,
       imageUrl,
-      locations,
+      locations: locations.length > 0 ? locations : undefined,
     };
 
     return new Response(
