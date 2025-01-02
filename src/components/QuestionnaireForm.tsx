@@ -1,7 +1,8 @@
 import { useState } from "react";
 import ResultsDisplay from "./ResultsDisplay";
 import QuestionCard from "./questionnaire/QuestionCard";
-import { questions, QuestionField } from "./questionnaire/questions";
+import { questions } from "./questionnaire/questionsList";
+import { QuestionField } from "./questionnaire/questionTypes";
 
 interface QuestionnaireFormProps {
   initialChoice: string;
