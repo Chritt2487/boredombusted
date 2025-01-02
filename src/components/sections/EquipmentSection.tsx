@@ -2,12 +2,55 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag } from "lucide-react";
 import { ActivityEquipment } from "../questionnaire/activityTypes";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EquipmentSectionProps {
   equipment: ActivityEquipment[];
 }
 
 export default function EquipmentSection({ equipment }: EquipmentSectionProps) {
+  const [affiliateId, setAffiliateId] = useState<string>("");
+  
+  useEffect(() => {
+    const getAffiliateId = async () => {
+      const { data: { secret }, error } = await supabase.rpc('get_secret', { 
+        name: 'AMAZON_AFFILIATE_KEY' 
+      });
+      
+      if (error) {
+        console.error('Error fetching affiliate ID:', error);
+        return;
+      }
+      
+      if (secret) {
+        setAffiliateId(secret);
+      }
+    };
+
+    getAffiliateId();
+  }, []);
+
+  const formatAmazonUrl = (baseUrl: string) => {
+    if (!baseUrl) return '';
+    
+    try {
+      const url = new URL(baseUrl);
+      // Ensure it's an Amazon URL
+      if (!url.hostname.includes('amazon')) {
+        return baseUrl;
+      }
+      
+      // Add or update affiliate tag
+      url.searchParams.set('tag', affiliateId);
+      
+      return url.toString();
+    } catch (e) {
+      console.error('Error formatting Amazon URL:', e);
+      return baseUrl;
+    }
+  };
+
   const categorizedEquipment = {
     required: equipment.filter(item => item.required),
     optional: equipment.filter(item => !item.required)
@@ -25,7 +68,7 @@ export default function EquipmentSection({ equipment }: EquipmentSectionProps) {
           </div>
           {item.affiliateUrl && (
             <Button 
-              onClick={() => window.open(item.affiliateUrl, '_blank')}
+              onClick={() => window.open(formatAmazonUrl(item.affiliateUrl), '_blank')}
               className="bg-[#F97316] hover:bg-[#EA580C] transition-colors duration-200"
             >
               <ShoppingBag className="mr-2 h-4 w-4" />
