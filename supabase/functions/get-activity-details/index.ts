@@ -5,6 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json'
 };
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -106,13 +107,9 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify(detailedInfo),
-      { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
-      }
+      { headers: corsHeaders }
     );
+
   } catch (error) {
     console.error('Error in get-activity-details:', error);
     return new Response(
@@ -123,10 +120,7 @@ serve(async (req) => {
       }),
       { 
         status: 500, 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
+        headers: corsHeaders
       }
     );
   }
