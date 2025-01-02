@@ -45,6 +45,9 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
   const currentQuestion = questions[currentStep];
   const currentValue = answers[currentQuestion.field as keyof typeof answers] as string;
 
+  // Calculate total steps by filtering questions that should be shown based on current answers
+  const totalSteps = questions.filter(q => shouldShowQuestion(q, answers)).length;
+
   return (
     <QuestionCard
       title={currentQuestion.title}
@@ -53,6 +56,8 @@ export default function QuestionnaireForm({ initialChoice }: QuestionnaireFormPr
       onSelect={handleOptionSelect}
       onNext={handleNext}
       isLastQuestion={getNextQuestion(currentStep, answers) === -1}
+      currentStep={currentStep + 1} // Adding 1 to make it 1-based for display
+      totalSteps={totalSteps}
     />
   );
 }
