@@ -13,12 +13,19 @@ const corsHeaders = {
 const activityCache = new Map();
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    if (!openAIApiKey) {
+      console.error('OpenAI API key is not set');
+      throw new Error('OpenAI API key is not configured');
+    }
+
     const { activityName } = await req.json();
+    console.log('Processing request for activity:', activityName);
     
     // Check cache first
     const cachedData = activityCache.get(activityName);
@@ -31,34 +38,50 @@ serve(async (req) => {
     }
 
     // Generate detailed information using GPT-4
-    const prompt = `For the activity "${activityName}", generate detailed information including:
-    1. Difficulty level (beginner/intermediate/advanced)
-    2. Time commitment (average time needed)
-    3. Cost estimate (startup and ongoing costs)
-    4. 3 essential equipment items with names, descriptions, and approximate prices
-    5. Benefits (skills developed, health benefits, social benefits)
-    6. Community aspects (groups, events, popular hashtags)
-    7. 3 alternative activities that someone might also enjoy
-    Format as JSON with this structure:
+    const prompt = `For the activity "${activityName}", generate detailed information in this exact JSON format:
     {
-      "difficulty": "",
-      "timeCommitment": "",
-      "costEstimate": "",
-      "equipment": [{"name": "", "description": "", "price": ""}],
+      "difficulty": "beginner/intermediate/advanced",
+      "timeCommitment": "average time needed",
+      "costEstimate": "startup and ongoing costs",
+      "equipment": [
+        {
+          "name": "item name",
+          "description": "brief description",
+          "price": "estimated price"
+        }
+      ],
       "benefits": {
-        "skills": [""],
-        "health": [""],
-        "social": [""]
+        "skills": ["list of skills developed"],
+        "health": ["list of health benefits"],
+        "social": ["list of social benefits"]
       },
       "community": {
-        "groups": [{"name": "", "description": "", "link": ""}],
-        "events": [{"name": "", "description": "", "date": ""}],
-        "hashtags": [""]
+        "groups": [
+          {
+            "name": "group name",
+            "description": "brief description",
+            "link": "website link"
+          }
+        ],
+        "events": [
+          {
+            "name": "event name",
+            "description": "brief description",
+            "date": "upcoming date or recurring"
+          }
+        ],
+        "hashtags": ["relevant hashtags"]
       },
-      "alternatives": [{"name": "", "description": ""}]
+      "alternatives": [
+        {
+          "name": "alternative activity name",
+          "description": "brief description why it's similar"
+        }
+      ]
     }`;
 
-    const gptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    console.log('Sending request to OpenAI');
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
@@ -67,20 +90,31 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are an expert activity recommendation system.' },
+          { 
+            role: 'system', 
+            content: 'You are an expert activity recommendation system. Always return complete, well-formatted JSON.' 
+          },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 1000
       }),
     });
 
-    if (!gptResponse.ok) {
-      throw new Error('Failed to generate detailed information');
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('OpenAI API error:', errorData);
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
-    const gptData = await gptResponse.json();
-    const detailedInfo = JSON.parse(gptData.choices[0].message.content);
+    const data = await response.json();
+    console.log('Received response from OpenAI');
+
+    if (!data.choices?.[0]?.message?.content) {
+      console.error('Invalid response format from OpenAI:', data);
+      throw new Error('Invalid response format from OpenAI');
+    }
+
+    const detailedInfo = JSON.parse(data.choices[0].message.content);
 
     // Add affiliate links to equipment
     detailedInfo.equipment = detailedInfo.equipment.map((item: any) => ({
@@ -97,10 +131,16 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error generating detailed information:', error);
+    console.error('Error in get-activity-details function:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to generate detailed information' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        error: 'Failed to generate detailed information',
+        details: error.message 
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     );
   }
 });
