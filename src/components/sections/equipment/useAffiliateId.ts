@@ -7,7 +7,7 @@ export function useAffiliateId() {
   useEffect(() => {
     const getAffiliateId = async () => {
       const { data, error } = await supabase.rpc('get_secret', {
-        name: 'AMAZON_AFFILIATE_KEY'
+        name: 'AMAZON_AFFILIATE_KEY' as string
       });
       
       if (error) {
