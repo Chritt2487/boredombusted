@@ -19,6 +19,10 @@ export interface DetailedActivity {
     health: string[];
     funFacts: string[];
   };
+  alternatives?: {
+    name: string;
+    description: string;
+  }[];
 }
 
 export interface ActivityDetailProps {
@@ -29,4 +33,5 @@ export interface ActivityDetailProps {
     benefits: string[];
   };
   onBack: () => void;
+  onSelectAlternative: (alternative: { name: string; description: string }) => void;
 }
