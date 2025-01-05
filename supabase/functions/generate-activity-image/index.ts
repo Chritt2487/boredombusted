@@ -14,14 +14,14 @@ serve(async (req) => {
     const { activityName } = await req.json();
     console.log('Generating image for activity:', activityName);
 
-    // Create a search query based on the activity name
-    const searchQuery = encodeURIComponent(`${activityName} activity lifestyle`);
     const pixabayKey = Deno.env.get('PIXABAY_API_KEY');
-
     if (!pixabayKey) {
       throw new Error('Pixabay API key not configured');
     }
 
+    // Create a search query based on the activity name
+    const searchQuery = encodeURIComponent(`${activityName} activity lifestyle`);
+    
     // Make request to Pixabay API
     const response = await fetch(
       `https://pixabay.com/api/?key=${pixabayKey}&q=${searchQuery}&image_type=photo&orientation=horizontal&per_page=3`

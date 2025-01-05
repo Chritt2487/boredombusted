@@ -24,7 +24,6 @@ const Index = () => {
   return (
     <div className="min-h-screen p-4 bg-gradient-to-b from-purple-50 to-white">
       <div className="max-w-2xl mx-auto space-y-8">
-        {/* Hero Section */}
         <div className="text-center space-y-4 mb-8 animate-fade-in">
           <h1 className="text-4xl font-bold text-[#9b87f5]">Discover Your Next Adventure</h1>
           <p className="text-gray-600">Let's find the perfect activity that matches your interests</p>
@@ -48,27 +47,22 @@ const Index = () => {
               {[
                 {
                   value: "Find a new hobby",
-                  icon: "https://images.unsplash.com/photo-1472289065668-ce650ac443d2?w=400&auto=format&fit=crop&q=60",
                   description: "Discover exciting new hobbies tailored to your interests"
                 },
                 {
                   value: "Do something near me",
-                  icon: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=400&auto=format&fit=crop&q=60",
                   description: "Explore activities and events in your area"
                 },
                 {
                   value: "Learn a skill",
-                  icon: "https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=400&auto=format&fit=crop&q=60",
                   description: "Master new skills with personalized learning paths"
                 },
                 {
                   value: "Try something new",
-                  icon: "https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?w=400&auto=format&fit=crop&q=60",
                   description: "Step out of your comfort zone with exciting experiences"
                 },
                 {
                   value: "Surprise me",
-                  icon: "https://images.unsplash.com/photo-1522403236043-29876aa85962?w=400&auto=format&fit=crop&q=60",
                   description: "Get a random activity suggestion right away"
                 },
               ].map((option) => (
@@ -76,13 +70,6 @@ const Index = () => {
                   key={option.value}
                   className="flex items-center space-x-4 p-4 rounded-lg border border-[#D6BCFA] hover:bg-[#F1F0FB] cursor-pointer transition-colors duration-200"
                 >
-                  <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden">
-                    <img 
-                      src={option.icon} 
-                      alt={option.value}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
                   <div className="flex-grow">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value={option.value} id={option.value} />
