@@ -2,37 +2,22 @@ import { Question } from './questionTypes';
 
 export const basicQuestions: Question[] = [
   {
-    title: "What's your age group?",
-    options: [
-      { value: "under_18", label: "Under 18" },
-      { value: "18_30", label: "18-30" },
-      { value: "31_50", label: "31-50" },
-      { value: "over_50", label: "Over 50" }
-    ],
-    field: "age"
-  },
-  {
-    title: "How would you describe your activity level?",
+    title: "What's your current energy level?",
     options: [
       { 
-        value: "sedentary",
-        label: "Sedentary",
-        description: "Mostly sitting, little physical activity"
-      },
-      { 
-        value: "light",
-        label: "Light",
-        description: "Regular daily activities, occasional light exercise"
+        value: "low",
+        label: "Low Energy",
+        description: "Looking for something relaxing or calming"
       },
       { 
         value: "moderate",
-        label: "Moderate",
-        description: "Regular exercise 2-3 times a week"
+        label: "Moderate Energy",
+        description: "Open to light physical activity or engaging tasks"
       },
       { 
-        value: "active",
-        label: "Active",
-        description: "Regular intense exercise 4+ times a week"
+        value: "high",
+        label: "High Energy",
+        description: "Ready for something active or challenging"
       }
     ],
     field: "activityLevel"

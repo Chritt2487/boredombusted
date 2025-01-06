@@ -2,13 +2,28 @@ import { Question } from './questionTypes';
 
 export const skillsQuestions: Question[] = [
   {
-    title: "What skills would you like to develop?",
+    title: "What would you like to develop?",
     options: [
-      { value: "Technical & Analytical", label: "Technical & Analytical" },
-      { value: "Creative & Artistic", label: "Creative & Artistic" },
-      { value: "Physical & Coordination", label: "Physical & Coordination" },
-      { value: "Social & Communication", label: "Social & Communication" },
-      { value: "Problem Solving", label: "Problem Solving" }
+      { 
+        value: "Technical & Analytical", 
+        label: "Technical Skills",
+        description: "Problem-solving and analytical thinking"
+      },
+      { 
+        value: "Creative & Artistic", 
+        label: "Creative Skills",
+        description: "Artistic expression and imagination"
+      },
+      { 
+        value: "Physical & Coordination", 
+        label: "Physical Skills",
+        description: "Movement and body coordination"
+      },
+      { 
+        value: "Social & Communication", 
+        label: "People Skills",
+        description: "Interpersonal and communication abilities"
+      }
     ],
     field: "skills",
     dependsOn: {
