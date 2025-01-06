@@ -59,14 +59,16 @@ export default function QuestionCard({
                     : "border-[#D6BCFA] hover:bg-[#F1F0FB]"
                 }`}
               >
-                <RadioGroupItem value={option.value} id={option.value} />
-                <div className="flex-grow">
-                  <Label htmlFor={option.value} className="cursor-pointer">
-                    {option.label}
-                  </Label>
-                  {option.description && (
-                    <p className="text-sm text-gray-500 mt-1">{option.description}</p>
-                  )}
+                <div className="flex items-center space-x-2 w-full">
+                  <RadioGroupItem value={option.value} id={option.value} />
+                  <div className="flex-grow">
+                    <Label htmlFor={option.value} className="cursor-pointer">
+                      {option.label}
+                    </Label>
+                    {option.description && (
+                      <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

@@ -9,7 +9,6 @@ const Index = () => {
 
   const handleOptionSelect = (value: string) => {
     setSelectedOption(value);
-    setShowForm(false);
   };
 
   const handleContinue = () => {
@@ -22,11 +21,6 @@ const Index = () => {
     <div className="min-h-screen p-4 bg-gradient-to-b from-purple-50 to-white">
       <div className="max-w-2xl mx-auto space-y-8">
         <Header />
-        <InitialChoiceCard
-          selectedOption={selectedOption}
-          onOptionSelect={handleOptionSelect}
-          onContinue={handleContinue}
-        />
         <ContentContainer 
           showForm={showForm}
           selectedOption={selectedOption}
