@@ -18,18 +18,23 @@ export default function ActivityImage({ name, imageUrl }: ActivityImageProps) {
   }
 
   return (
-    <>
+    <div className="relative w-full h-full">
       <img
         src={resolvedImageUrl || "/placeholder.svg"}
         alt={name}
         className="w-full h-full object-cover"
+        onError={(e) => {
+          console.error(`Error loading image for ${name}, falling back to placeholder`);
+          e.currentTarget.src = "/placeholder.svg";
+          e.currentTarget.classList.add("opacity-80");
+        }}
       />
-      {isFallback && (
+      {(isFallback || !resolvedImageUrl) && (
         <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded-md text-xs flex items-center gap-1">
           <ImageOff className="w-3 h-3" />
           <span>Generic Image</span>
         </div>
       )}
-    </>
+    </div>
   );
 }
