@@ -13,7 +13,7 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
       messages: [
         { 
           role: 'system', 
-          content: 'You are a JSON-only response generator. Only return valid JSON objects, no additional text or explanations.' 
+          content: 'You are a helpful assistant that generates content based on user prompts.' 
         },
         { role: 'user', content: prompt }
       ],

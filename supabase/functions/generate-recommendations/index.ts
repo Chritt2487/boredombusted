@@ -4,7 +4,7 @@ import { generateOpenAIResponse } from "./openai.ts";
 import { corsHeaders, generatePrompt, validateActivities } from "./utils.ts";
 import type { UserAnswers, RecommendationsResponse } from "./types.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const openAIApiKey = Deno.env.get('Open_AI_2');
 
 serve(async (req) => {
   // Handle CORS preflight requests
