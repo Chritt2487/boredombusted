@@ -1,8 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Share2 } from "lucide-react";
+import { Loader2, Share2, ImageOff } from "lucide-react";
 import { useActivityImage } from "@/hooks/useActivityImage";
-import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ActivityCardProps {
@@ -19,7 +18,7 @@ interface ActivityCardProps {
 }
 
 export default function ActivityCard({ activity, onSelect }: ActivityCardProps) {
-  const { imageUrl, isLoading } = useActivityImage(activity.name, activity.imageUrl);
+  const { imageUrl, isLoading, isFallback } = useActivityImage(activity.name, activity.imageUrl);
   const { toast } = useToast();
 
   const handleShare = async (e: React.MouseEvent) => {
@@ -50,11 +49,19 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
               <Loader2 className="h-8 w-8 animate-spin text-[#9b87f5]" />
             </div>
           ) : (
-            <img
-              src={imageUrl || "/placeholder.svg"}
-              alt={activity.name}
-              className="w-full h-full object-cover"
-            />
+            <>
+              <img
+                src={imageUrl || "/placeholder.svg"}
+                alt={activity.name}
+                className="w-full h-full object-cover"
+              />
+              {isFallback && (
+                <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded-md text-xs flex items-center gap-1">
+                  <ImageOff className="w-3 h-3" />
+                  <span>Generic Image</span>
+                </div>
+              )}
+            </>
           )}
         </div>
         <div className="flex justify-between items-center">

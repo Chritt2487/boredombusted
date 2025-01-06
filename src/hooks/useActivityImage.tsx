@@ -7,6 +7,7 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 interface CachedImage {
   url: string;
   timestamp: number;
+  isFallback?: boolean;
 }
 
 interface ImageCache {
@@ -35,6 +36,7 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
   const [imageUrl, setImageUrl] = useState<string>(initialImageUrl);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [isFallback, setIsFallback] = useState(false);
 
   useEffect(() => {
     const generateImage = async () => {
@@ -49,6 +51,7 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
           if (cachedImage && Date.now() - cachedImage.timestamp < CACHE_DURATION) {
             console.log(`Using cached image for ${activityName}`);
             setImageUrl(cachedImage.url);
+            setIsFallback(!!cachedImage.isFallback);
             return;
           }
 
@@ -68,7 +71,14 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
             console.log(`Found existing image for ${activityName}`);
             setImageUrl(existingImage.image_url);
             // Update cache
-            const newCache = { ...getImageCache(), [activityName]: { url: existingImage.image_url, timestamp: Date.now() } };
+            const newCache = { 
+              ...getImageCache(), 
+              [activityName]: { 
+                url: existingImage.image_url, 
+                timestamp: Date.now(),
+                isFallback: false
+              } 
+            };
             setImageCache(newCache);
           } else {
             console.log(`Generating new image for ${activityName}`);
@@ -83,6 +93,9 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
 
             if (data?.image) {
               console.log(`Successfully generated image for ${activityName}`);
+              console.log('Image source:', data.source);
+              console.log('Is fallback:', data.isFallback);
+
               const { error: insertError } = await supabase
                 .from('activity_images')
                 .insert([
@@ -95,8 +108,17 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
               }
 
               setImageUrl(data.image);
+              setIsFallback(data.isFallback);
+              
               // Update cache
-              const newCache = { ...getImageCache(), [activityName]: { url: data.image, timestamp: Date.now() } };
+              const newCache = { 
+                ...getImageCache(), 
+                [activityName]: { 
+                  url: data.image, 
+                  timestamp: Date.now(),
+                  isFallback: data.isFallback
+                } 
+              };
               setImageCache(newCache);
             }
           }
@@ -104,6 +126,7 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
           console.error("Error in image generation process:", error);
           setError(error as Error);
           setImageUrl("/placeholder.svg");
+          setIsFallback(true);
         } finally {
           setIsLoading(false);
         }
@@ -113,5 +136,5 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
     generateImage();
   }, [activityName, initialImageUrl]);
 
-  return { imageUrl, isLoading, error };
+  return { imageUrl, isLoading, error, isFallback };
 }
