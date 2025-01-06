@@ -57,7 +57,7 @@ export function generatePrompt(answers: UserAnswers, existingActivities: string[
     - ALL content must be family-friendly
     - NO explicit, sexual, or violent content
     - NO dangerous activities
-    - NO inappropriate themes or suggestions
+    - NO mature themes or suggestions
     - Include appropriate safety warnings and adult supervision requirements where needed
 
     Core Requirements (ALL must be met):
@@ -109,10 +109,18 @@ export function validateActivities(activities: Activity[]): void {
       throw new Error(`Activity at index ${index} description must be at least 2 sentences`);
     }
 
-    // Check for potentially inappropriate content
+    // Updated list of inappropriate terms to be more specific and avoid false positives
     const inappropriateTerms = [
-      'explicit', 'sexual', 'violent', 'dangerous', 'weapon', 'drug', 'alcohol',
-      'gambling', 'inappropriate', 'adult content', 'mature'
+      'explicit content',
+      'sexual content',
+      'violence',
+      'weapon',
+      'drug',
+      'alcohol',
+      'gambling',
+      'mature content',
+      'adult content',
+      'nsfw'
     ];
 
     const contentToCheck = [
@@ -123,7 +131,7 @@ export function validateActivities(activities: Activity[]): void {
 
     const foundTerms = inappropriateTerms.filter(term => contentToCheck.includes(term));
     if (foundTerms.length > 0) {
-      throw new Error(`Activity at index ${index} contains inappropriate content: ${foundTerms.join(', ')}`);
+      throw new Error(`Activity at index ${index} contains prohibited content: ${foundTerms.join(', ')}`);
     }
   });
 }
