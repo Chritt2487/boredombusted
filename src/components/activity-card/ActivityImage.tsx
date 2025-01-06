@@ -17,15 +17,17 @@ export default function ActivityImage({ name, imageUrl }: ActivityImageProps) {
     );
   }
 
+  const fallbackUrl = "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2940&auto=format&fit=crop";
+
   return (
     <div className="relative w-full h-full">
       <img
-        src={resolvedImageUrl || "/placeholder.svg"}
+        src={resolvedImageUrl || fallbackUrl}
         alt={name}
         className="w-full h-full object-cover"
         onError={(e) => {
-          console.error(`Error loading image for ${name}, falling back to placeholder`);
-          e.currentTarget.src = "/placeholder.svg";
+          console.error(`Error loading image for ${name}, falling back to nature placeholder`);
+          e.currentTarget.src = fallbackUrl;
           e.currentTarget.classList.add("opacity-80");
         }}
       />

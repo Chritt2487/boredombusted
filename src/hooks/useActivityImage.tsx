@@ -55,25 +55,28 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
               throw error || new Error('No image generated');
             }
 
-            setImageUrl(data.image);
+            const finalImageUrl = data.image;
+            setImageUrl(finalImageUrl);
             setIsFallback(data.isFallback);
             
             // Cache the result
             setImageCache({ 
               ...getImageCache(), 
               [activityName]: { 
-                url: data.image, 
+                url: finalImageUrl, 
                 timestamp: Date.now(),
                 isFallback: data.isFallback
               } 
             });
 
-            // Store in database
-            await supabase
-              .from('activity_images')
-              .insert([
-                { activity_name: activityName, image_url: data.image }
-              ]);
+            // Store in database if it's not a fallback
+            if (!data.isFallback) {
+              await supabase
+                .from('activity_images')
+                .insert([
+                  { activity_name: activityName, image_url: finalImageUrl }
+                ]);
+            }
           }
         } catch (error) {
           console.error("Error in image generation process:", error);

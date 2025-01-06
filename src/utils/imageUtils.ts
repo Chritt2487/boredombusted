@@ -19,11 +19,11 @@ export const ACTIVITY_CATEGORIES = {
 } as const;
 
 export const FALLBACK_IMAGES = {
-  outdoor: "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
-  indoor: "https://images.unsplash.com/photo-1516541196182-6bdb0516ed27",
-  creative: "https://images.unsplash.com/photo-1513364776144-60967b0f800f",
-  social: "https://images.unsplash.com/photo-1543269664-56d93c1b41a6",
-  default: "https://images.unsplash.com/photo-1528716321680-815a8cdb8cbe"
+  outdoor: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2940&auto=format&fit=crop",
+  indoor: "https://images.unsplash.com/photo-1516541196182-6bdb0516ed27?q=80&w=2940&auto=format&fit=crop",
+  creative: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=2940&auto=format&fit=crop",
+  social: "https://images.unsplash.com/photo-1543269664-56d93c1b41a6?q=80&w=2940&auto=format&fit=crop",
+  default: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2940&auto=format&fit=crop"
 };
 
 export const getImageCache = (): ImageCache => {
