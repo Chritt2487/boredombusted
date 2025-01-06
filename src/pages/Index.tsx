@@ -95,7 +95,7 @@ const Index = () => {
 
         {/* Add Google Ad between questionnaire and results */}
         <GoogleAd 
-          slot="1234567890" // Replace with your actual ad slot ID
+          slot="2480421197"
           style={{ minHeight: '250px' }}
         />
 

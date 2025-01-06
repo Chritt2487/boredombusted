@@ -26,7 +26,7 @@ const GoogleAd = ({ slot, format = 'auto', style }: GoogleAdProps) => {
           textAlign: 'center',
           ...style,
         }}
-        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" // Replace with your publisher ID
+        data-ad-client="ca-pub-5174694572308934"
         data-ad-slot={slot}
         data-ad-format={format}
         data-full-width-responsive="true"
