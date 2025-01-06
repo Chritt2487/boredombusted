@@ -8,16 +8,15 @@ import ResultsGrid from "./ResultsGrid";
 import LoadMoreButton from "./LoadMoreButton";
 import QuestionnaireContainer from "../questionnaire/QuestionnaireContainer";
 import { Button } from "../ui/button";
-import { RefreshCw } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface ResultsContainerProps {
   answers: {
     initialChoice: string;
-    environment: string;
-    activityLevel: string;
-    timeCommitment: string;
-    budget: string;
-    social: string;
+    environment?: string;
+    timeCommitment?: string;
+    budget?: string;
+    social?: string;
     isRandom?: boolean;
   };
 }
@@ -100,8 +99,8 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
           onClick={() => setShowRefinement(true)}
           className="bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
         >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refine Results
+          <Sparkles className="mr-2 h-4 w-4" />
+          Get More Personalized Results
         </Button>
       </div>
     </div>
