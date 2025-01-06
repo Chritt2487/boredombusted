@@ -75,10 +75,6 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
             <ShoppingBag className="mr-2 h-4 w-4" />
             Shop on Amazon
           </Button>
-          
-          <p className="text-sm text-gray-500 italic text-center">
-            As an Amazon Associate, we may earn from qualifying purchases.
-          </p>
         </div>
       </CardContent>
     </Card>

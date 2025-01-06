@@ -83,20 +83,25 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
         activities={activities}
         onSelectActivity={setSelectedActivity}
       />
-      <div className="flex justify-center gap-4">
-        <LoadMoreButton 
-          isLoading={isFetching}
-          onClick={handleLoadMore}
-        />
-        {!answers.isRefined && (
-          <Button
-            onClick={() => setShowRefinement(true)}
-            className="bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
-          >
-            <Sparkles className="mr-2 h-4 w-4" />
-            Get More Personalized Results
-          </Button>
-        )}
+      <div className="flex flex-col items-center gap-4">
+        <div className="flex gap-4">
+          <LoadMoreButton 
+            isLoading={isFetching}
+            onClick={handleLoadMore}
+          />
+          {!answers.isRefined && (
+            <Button
+              onClick={() => setShowRefinement(true)}
+              className="bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Get More Personalized Results
+            </Button>
+          )}
+        </div>
+        <p className="text-sm text-gray-500 italic text-center mt-4">
+          As an Amazon Associate, we may earn from qualifying purchases.
+        </p>
       </div>
     </div>
   );
