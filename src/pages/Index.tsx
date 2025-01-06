@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import QuestionnaireForm from "@/components/QuestionnaireForm";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import GoogleAd from "@/components/GoogleAd";
 
 const Index = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -91,6 +92,12 @@ const Index = () => {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Add Google Ad between questionnaire and results */}
+        <GoogleAd 
+          slot="1234567890" // Replace with your actual ad slot ID
+          style={{ minHeight: '250px' }}
+        />
 
         <ErrorBoundary>
           {showForm && <QuestionnaireForm initialChoice={selectedOption} />}
