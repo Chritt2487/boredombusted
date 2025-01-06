@@ -22,14 +22,23 @@ const GoogleAd = ({ slot, format = 'auto', style }: GoogleAdProps) => {
     };
 
     // Add error event listener for ad failures
-    window.addEventListener('error', (e) => {
-      if (e.target instanceof HTMLElement && e.target.tagName === 'SCRIPT' && e.target.src.includes('pagead2.googlesyndication.com')) {
+    const handleError = (e: Event) => {
+      if (
+        e.target instanceof HTMLScriptElement && 
+        e.target.src.includes('pagead2.googlesyndication.com')
+      ) {
         console.log('Non-critical Google AdSense script error - this is normal in development');
         e.preventDefault();
       }
-    }, true);
+    };
 
+    window.addEventListener('error', handleError, true);
     loadAd();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('error', handleError, true);
+    };
   }, [slot]);
 
   if (adError) {
