@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Tag } from "lucide-react";
+import { ShoppingBag, Tag, PlayCircle } from "lucide-react";
 import ActivityImage from "./activity-card/ActivityImage";
 import ActivityDetails from "./activity-card/ActivityDetails";
 import ShareButton from "./activity-card/ShareButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
+import { getTranslation, type Language } from "@/utils/i18n";
 
 interface ActivityCardProps {
   activity: {
@@ -16,11 +17,17 @@ interface ActivityCardProps {
     timeCommitment?: string;
     costEstimate?: string;
     benefits?: string[];
+    videoUrl?: string;
   };
   onSelect: (activity: any) => void;
+  language?: Language;
 }
 
-export default function ActivityCard({ activity, onSelect }: ActivityCardProps) {
+export default function ActivityCard({ 
+  activity, 
+  onSelect,
+  language = 'en' 
+}: ActivityCardProps) {
   const [affiliateId, setAffiliateId] = useState('default-tag');
   const [categories, setCategories] = useState<string[]>([]);
 
@@ -64,6 +71,14 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
     window.open(amazonSearchUrl, '_blank');
   };
 
+  const handleVideoClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (activity.videoUrl) {
+      console.log('Opening video tutorial for:', activity.name);
+      window.open(activity.videoUrl, '_blank');
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       onSelect(activity);
@@ -82,6 +97,17 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
       <CardHeader>
         <div className="w-full h-48 rounded-lg overflow-hidden mb-4 relative">
           <ActivityImage name={activity.name} imageUrl={activity.imageUrl} />
+          {activity.videoUrl && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute bottom-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full"
+              onClick={handleVideoClick}
+              aria-label="Watch tutorial video"
+            >
+              <PlayCircle className="h-6 w-6" />
+            </Button>
+          )}
         </div>
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl text-[#7E69AB]">{activity.name}</CardTitle>
@@ -108,6 +134,7 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
           difficulty={activity.difficulty}
           timeCommitment={activity.timeCommitment}
           costEstimate={activity.costEstimate}
+          language={language}
         />
         
         <div className="space-y-2">
@@ -116,7 +143,7 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
             onClick={() => onSelect(activity)}
             aria-label={`Learn more about ${activity.name}`}
           >
-            Learn More
+            {getTranslation('learnMore', language)}
           </Button>
           
           <Button 
@@ -125,7 +152,7 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
             aria-label={`Shop for ${activity.name} on Amazon`}
           >
             <ShoppingBag className="mr-2 h-4 w-4" />
-            Shop on Amazon
+            {getTranslation('shopOnAmazon', language)}
           </Button>
         </div>
       </CardContent>
