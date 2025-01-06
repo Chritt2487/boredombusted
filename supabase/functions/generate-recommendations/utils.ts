@@ -5,6 +5,31 @@ export const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+export function applyWeightedParameters(answers: UserAnswers): UserAnswers {
+  // Define random weights for each parameter type
+  const weights = {
+    environment: Math.random() * 0.4 + 0.8, // 0.8 to 1.2
+    activityLevel: Math.random() * 0.4 + 0.8,
+    social: Math.random() * 0.4 + 0.8,
+    skills: Math.random() * 0.4 + 0.8
+  };
+
+  console.log('Applied parameter weights:', weights);
+
+  // Clone answers to avoid modifying the original
+  const weightedAnswers = { ...answers };
+
+  // Add weight information to the prompt
+  weightedAnswers.environment = `${answers.environment} (weight: ${weights.environment.toFixed(2)})`;
+  weightedAnswers.activityLevel = `${answers.activityLevel} (weight: ${weights.activityLevel.toFixed(2)})`;
+  weightedAnswers.social = `${answers.social} (weight: ${weights.social.toFixed(2)})`;
+  if (answers.skills) {
+    weightedAnswers.skills = `${answers.skills} (weight: ${weights.skills.toFixed(2)})`;
+  }
+
+  return weightedAnswers;
+}
+
 export function generatePrompt(answers: UserAnswers, existingActivities: string[] = []): string {
   const activityLevelGuide = {
     low: "very light physical effort, relaxing activities",
@@ -74,6 +99,7 @@ export function generatePrompt(answers: UserAnswers, existingActivities: string[
     2. Each activity MUST strictly adhere to ALL requirements above
     3. Activities should be specific, actionable, and age-appropriate
     4. Include practical tips for implementation and safety considerations
+    5. Be creative and suggest at least one unconventional or surprising activity that still fits the criteria
 
     Return ONLY a valid JSON object with this exact structure:
     {

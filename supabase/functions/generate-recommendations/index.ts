@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { generateOpenAIResponse } from "./openai.ts";
-import { corsHeaders, generatePrompt, validateActivities } from "./utils.ts";
+import { corsHeaders, generatePrompt, validateActivities, applyWeightedParameters } from "./utils.ts";
 import type { UserAnswers, RecommendationsResponse } from "./types.ts";
 
 const openAIApiKey = Deno.env.get('Open_AI_2');
@@ -35,30 +35,47 @@ serve(async (req) => {
     console.log('Processing request with answers:', answers);
     console.log('Existing activities:', existingActivities);
     
-    const prompt = generatePrompt(answers, existingActivities);
-    console.log('Generated prompt:', prompt);
+    // Apply weighted parameters to introduce variability
+    const weightedAnswers = applyWeightedParameters(answers);
+    console.log('Weighted answers:', weightedAnswers);
 
-    const gptData = await generateOpenAIResponse(openAIApiKey, prompt);
-    console.log('Received GPT response:', gptData);
+    // Generate multiple prompts with different temperatures
+    const temperatures = [0.7, 0.85, 1.0];
+    const allResponses: RecommendationsResponse[] = [];
+
+    for (const temperature of temperatures) {
+      const prompt = generatePrompt(weightedAnswers, existingActivities);
+      console.log(`Generating response with temperature ${temperature}`);
+      
+      try {
+        const gptData = await generateOpenAIResponse(openAIApiKey, prompt, temperature);
+        console.log(`Received GPT response for temperature ${temperature}:`, gptData);
+        
+        if (!gptData.choices?.[0]?.message?.content) {
+          console.error('Invalid OpenAI response structure:', gptData);
+          continue;
+        }
+
+        const content = gptData.choices[0].message.content.trim();
+        console.log('Parsing OpenAI response:', content);
+        const recommendations = JSON.parse(content);
+        validateActivities(recommendations.activities);
+        allResponses.push(recommendations);
+      } catch (error) {
+        console.error(`Error with temperature ${temperature}:`, error);
+        continue;
+      }
+    }
+
+    if (allResponses.length === 0) {
+      throw new Error('Failed to generate valid recommendations with any temperature');
+    }
+
+    // Randomly select activities from all valid responses
+    const selectedResponse = allResponses[Math.floor(Math.random() * allResponses.length)];
     
-    if (!gptData.choices?.[0]?.message?.content) {
-      console.error('Invalid OpenAI response structure:', gptData);
-      throw new Error('OpenAI response missing required content');
-    }
-
-    let recommendations: RecommendationsResponse;
-    try {
-      const content = gptData.choices[0].message.content.trim();
-      console.log('Parsing OpenAI response:', content);
-      recommendations = JSON.parse(content);
-      validateActivities(recommendations.activities);
-    } catch (error) {
-      console.error('Error parsing OpenAI response:', error);
-      throw new Error(`Invalid response format from OpenAI: ${error.message}`);
-    }
-
     // Add placeholder images
-    const activitiesWithImages = recommendations.activities.map(activity => ({
+    const activitiesWithImages = selectedResponse.activities.map(activity => ({
       ...activity,
       imageUrl: '/placeholder.svg',
     }));
