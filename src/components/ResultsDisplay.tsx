@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ActivityDetail from "./ActivityDetail";
 import LoadingState from "./results/LoadingState";
 import ResultsHeader from "./results/ResultsHeader";
 import ResultsGrid from "./results/ResultsGrid";
+import LoadMoreButton from "./results/LoadMoreButton";
 import { Activity } from "./results/types";
-import { Button } from "./ui/button";
-import { Loader2 } from "lucide-react";
 
 interface ResultsDisplayProps {
   answers: {
@@ -104,22 +103,10 @@ export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
         activities={activities}
         onSelectActivity={setSelectedActivity}
       />
-      <div className="flex justify-center">
-        <Button
-          onClick={handleLoadMore}
-          disabled={loadingMore}
-          className="bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
-        >
-          {loadingMore ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Loading more...
-            </>
-          ) : (
-            "Load More Activities"
-          )}
-        </Button>
-      </div>
+      <LoadMoreButton 
+        isLoading={loadingMore}
+        onClick={handleLoadMore}
+      />
     </div>
   );
 }
