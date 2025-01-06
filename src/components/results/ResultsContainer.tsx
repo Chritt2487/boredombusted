@@ -35,7 +35,7 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
     refetch
   } = useActivityData(answers, activities.map(a => a.name));
 
-  // Update activities when new data arrives
+  // Only update activities when initial data arrives
   if (newActivities && activities.length === 0) {
     console.log('Received initial activities:', newActivities.length);
     setActivities(newActivities);
@@ -43,10 +43,10 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
 
   const handleLoadMore = async () => {
     console.log('Loading more activities...');
-    await refetch();
-    if (newActivities) {
-      console.log('Received additional activities:', newActivities.length);
-      setActivities(prev => [...prev, ...newActivities]);
+    const result = await refetch();
+    if (result.data) {
+      console.log('Received additional activities:', result.data.length);
+      setActivities(prev => [...prev, ...result.data]);
     }
   };
 
