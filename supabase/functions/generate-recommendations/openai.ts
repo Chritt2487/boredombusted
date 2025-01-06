@@ -1,7 +1,7 @@
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
 
 export async function generateOpenAIResponse(openAIApiKey: string, prompt: string) {
-  console.log('Sending request to OpenAI');
+  console.log('Sending request to OpenAI with prompt:', prompt);
   const response = await fetch(OPENAI_URL, {
     method: 'POST',
     headers: {
@@ -13,11 +13,11 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
       messages: [
         { 
           role: 'system', 
-          content: 'You are a helpful assistant that generates content based on user prompts.' 
+          content: 'You are a JSON-only response generator specialized in activity recommendations. You must strictly follow all requirements provided and only return valid JSON objects that match the exact criteria specified. No additional text or explanations.' 
         },
         { role: 'user', content: prompt }
       ],
-      temperature: 0.7,
+      temperature: 0.5, // Lower temperature for more focused responses
       max_tokens: 2000
     }),
   });
@@ -28,5 +28,7 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
     throw new Error(`OpenAI API error: ${errorText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log('Received response from OpenAI:', data);
+  return data;
 }
