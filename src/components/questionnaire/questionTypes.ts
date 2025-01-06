@@ -8,6 +8,7 @@ export type Question = {
   title: string;
   options: QuestionOption[];
   field: string;
+  category?: string;
   dependsOn?: {
     field: string;
     values: string[];

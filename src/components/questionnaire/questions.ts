@@ -4,12 +4,15 @@ import { skillsQuestions } from './skillsQuestions';
 import { practicalQuestions } from './practicalQuestions';
 import { Question, AnswersType } from './questionTypes';
 
-export const questions: Question[] = [
+export const questions = [
   ...basicQuestions,
   ...activityQuestions,
   ...skillsQuestions,
   ...practicalQuestions
 ];
+
+// Explicitly export allQuestions as well
+export const allQuestions = questions;
 
 export type QuestionField = typeof questions[number]['field'];
 

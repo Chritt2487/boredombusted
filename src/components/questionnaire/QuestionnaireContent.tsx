@@ -1,7 +1,7 @@
-import { allQuestions, shouldShowQuestion, getNextQuestion } from "./questions";
+import { questions, shouldShowQuestion, getNextQuestion } from "./questions";
 import QuestionCard from "./QuestionCard";
-import type { AnswersType } from "./types/questionTypes";
-import type { Question } from "./types/questionTypes";
+import type { AnswersType } from "./questionTypes";
+import type { Question } from "./questionTypes";
 import { QuestionnaireAnswers } from "@/types/activity";
 
 interface QuestionnaireContentProps {
@@ -20,13 +20,13 @@ export default function QuestionnaireContent({
   answers,
   setAnswers,
   setIsComplete,
-  questions = allQuestions,
+  questions: customQuestions = questions,
   previousAnswers,
 }: QuestionnaireContentProps) {
   const handleOptionSelect = (value: string) => {
     setAnswers((prev: Partial<AnswersType>) => ({
       ...prev,
-      [questions[currentStep].field]: value,
+      [customQuestions[currentStep].field]: value,
     }));
   };
 
@@ -44,8 +44,8 @@ export default function QuestionnaireContent({
   const getNextQuestionIndex = (currentIndex: number): number => {
     let nextIndex = currentIndex + 1;
     
-    while (nextIndex < questions.length) {
-      const question = questions[nextIndex];
+    while (nextIndex < customQuestions.length) {
+      const question = customQuestions[nextIndex];
       const relevantAnswers = previousAnswers ? { ...previousAnswers, ...answers } : answers;
       
       if (!question.dependsOn || shouldShowQuestion(question, relevantAnswers)) {
@@ -57,9 +57,9 @@ export default function QuestionnaireContent({
     return -1;
   };
 
-  const currentQuestion = questions[currentStep];
+  const currentQuestion = customQuestions[currentStep];
   const currentValue = answers[currentQuestion.field as keyof typeof answers] as string;
-  const totalSteps = questions.filter(q => {
+  const totalSteps = customQuestions.filter(q => {
     const relevantAnswers = previousAnswers ? { ...previousAnswers, ...answers } : answers;
     return shouldShowQuestion(q, relevantAnswers);
   }).length;
