@@ -1,15 +1,22 @@
-interface CachedImage {
+export interface CachedImage {
   url: string;
   timestamp: number;
   isFallback?: boolean;
 }
 
-interface ImageCache {
+export interface ImageCache {
   [key: string]: CachedImage;
 }
 
-const IMAGE_CACHE_KEY = 'activity_images_cache';
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+export const IMAGE_CACHE_KEY = 'activity_images_cache';
+export const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+export const ACTIVITY_CATEGORIES = {
+  OUTDOOR: ['hiking', 'garden', 'outdoor', 'nature', 'park'],
+  INDOOR: ['reading', 'cooking', 'indoor', 'home'],
+  CREATIVE: ['art', 'craft', 'paint', 'create', 'music'],
+  SOCIAL: ['party', 'group', 'social', 'meet', 'community'],
+} as const;
 
 export const FALLBACK_IMAGES = {
   outdoor: "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
@@ -38,25 +45,13 @@ export const setImageCache = (cache: ImageCache) => {
 };
 
 export const getFallbackImage = (activityName: string): string => {
-  const outdoorKeywords = ['hiking', 'garden', 'outdoor', 'nature', 'park'];
-  const indoorKeywords = ['reading', 'cooking', 'indoor', 'home'];
-  const creativeKeywords = ['art', 'craft', 'paint', 'create', 'music'];
-  const socialKeywords = ['party', 'group', 'social', 'meet', 'community'];
-
   const lowerActivity = activityName.toLowerCase();
-
-  if (outdoorKeywords.some(keyword => lowerActivity.includes(keyword))) {
-    return FALLBACK_IMAGES.outdoor;
+  
+  for (const [category, keywords] of Object.entries(ACTIVITY_CATEGORIES)) {
+    if (keywords.some(keyword => lowerActivity.includes(keyword))) {
+      return FALLBACK_IMAGES[category.toLowerCase() as keyof typeof FALLBACK_IMAGES];
+    }
   }
-  if (indoorKeywords.some(keyword => lowerActivity.includes(keyword))) {
-    return FALLBACK_IMAGES.indoor;
-  }
-  if (creativeKeywords.some(keyword => lowerActivity.includes(keyword))) {
-    return FALLBACK_IMAGES.creative;
-  }
-  if (socialKeywords.some(keyword => lowerActivity.includes(keyword))) {
-    return FALLBACK_IMAGES.social;
-  }
-
+  
   return FALLBACK_IMAGES.default;
 };

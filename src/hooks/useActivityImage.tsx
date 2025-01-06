@@ -9,7 +9,7 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
   const [isFallback, setIsFallback] = useState(false);
 
   useEffect(() => {
-    const generateImage = async () => {
+    const fetchImage = async () => {
       if (!initialImageUrl || initialImageUrl === "/placeholder.svg") {
         setIsLoading(true);
         
@@ -25,7 +25,7 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
             return;
           }
 
-          console.log(`Fetching image for ${activityName} from database`);
+          // Try to fetch from database
           const { data: existingImage, error: fetchError } = await supabase
             .from('activity_images')
             .select('image_url')
@@ -46,7 +46,7 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
               } 
             });
           } else {
-            console.log(`Generating new image for ${activityName}`);
+            // Generate new image
             const { data, error } = await supabase.functions.invoke('generate-activity-image', {
               body: { activityName }
             });
@@ -55,17 +55,10 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
               throw error || new Error('No image generated');
             }
 
-            console.log(`Successfully generated image for ${activityName}`);
-            
-            await supabase
-              .from('activity_images')
-              .insert([
-                { activity_name: activityName, image_url: data.image }
-              ]);
-
             setImageUrl(data.image);
             setIsFallback(data.isFallback);
             
+            // Cache the result
             setImageCache({ 
               ...getImageCache(), 
               [activityName]: { 
@@ -74,6 +67,13 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
                 isFallback: data.isFallback
               } 
             });
+
+            // Store in database
+            await supabase
+              .from('activity_images')
+              .insert([
+                { activity_name: activityName, image_url: data.image }
+              ]);
           }
         } catch (error) {
           console.error("Error in image generation process:", error);
@@ -96,7 +96,7 @@ export function useActivityImage(activityName: string, initialImageUrl: string) 
       }
     };
 
-    generateImage();
+    fetchImage();
   }, [activityName, initialImageUrl]);
 
   return { imageUrl, isLoading, error, isFallback };
