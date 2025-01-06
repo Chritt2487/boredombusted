@@ -6,17 +6,15 @@ import LoadingState from "./LoadingState";
 import ResultsHeader from "./ResultsHeader";
 import ResultsGrid from "./ResultsGrid";
 import LoadMoreButton from "./LoadMoreButton";
-import QuestionnaireContainer from "../questionnaire/QuestionnaireContainer";
-import { Button } from "../ui/button";
-import { Sparkles } from "lucide-react";
 
 interface ResultsContainerProps {
   answers: {
     initialChoice: string;
-    environment?: string;
-    timeCommitment?: string;
-    budget?: string;
-    social?: string;
+    environment: string;
+    activityLevel: string;
+    timeCommitment: string;
+    budget: string;
+    social: string;
     isRandom?: boolean;
   };
 }
@@ -24,7 +22,6 @@ interface ResultsContainerProps {
 export default function ResultsContainer({ answers }: ResultsContainerProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
-  const [showRefinement, setShowRefinement] = useState(false);
 
   const { 
     data: newActivities,
@@ -56,19 +53,6 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (showRefinement) {
-    return (
-      <QuestionnaireContainer 
-        initialChoice="refine" 
-        onComplete={(refinedAnswers) => {
-          setShowRefinement(false);
-          // Clear existing activities to show new refined results
-          setActivities([]);
-        }}
-      />
-    );
-  }
-
   if (isLoading && activities.length === 0) {
     return <LoadingState />;
   }
@@ -90,19 +74,10 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
         activities={activities}
         onSelectActivity={setSelectedActivity}
       />
-      <div className="flex justify-center gap-4">
-        <LoadMoreButton 
-          isLoading={isFetching}
-          onClick={handleLoadMore}
-        />
-        <Button
-          onClick={() => setShowRefinement(true)}
-          className="bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
-        >
-          <Sparkles className="mr-2 h-4 w-4" />
-          Get More Personalized Results
-        </Button>
-      </div>
+      <LoadMoreButton 
+        isLoading={isFetching}
+        onClick={handleLoadMore}
+      />
     </div>
   );
 }
