@@ -9,28 +9,35 @@ const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      headers: {
+        ...corsHeaders,
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      }
+    });
   }
 
   try {
-    console.log('Starting generate-recommendations function');
-    
     if (!openAIApiKey) {
       console.error('OpenAI API key is not configured');
       throw new Error('OpenAI API key is not configured');
+    }
+
+    if (req.method !== 'POST') {
+      throw new Error(`HTTP method ${req.method} is not allowed`);
     }
 
     const { answers, existingActivities = [] } = await req.json() as { 
       answers: UserAnswers;
       existingActivities?: string[];
     };
-    console.log('Received answers:', answers);
+
+    console.log('Processing request with answers:', answers);
     console.log('Existing activities:', existingActivities);
     
     const prompt = generatePrompt(answers, existingActivities);
     const gptData = await generateOpenAIResponse(openAIApiKey, prompt);
-    console.log('Received response from OpenAI:', gptData);
-
+    
     if (!gptData.choices?.[0]?.message?.content) {
       console.error('Invalid OpenAI response structure:', gptData);
       throw new Error('OpenAI response missing required content');
@@ -39,9 +46,8 @@ serve(async (req) => {
     let recommendations: RecommendationsResponse;
     try {
       const content = gptData.choices[0].message.content.trim();
-      console.log('Attempting to parse content:', content);
+      console.log('Parsing OpenAI response:', content);
       recommendations = JSON.parse(content);
-      
       validateActivities(recommendations.activities);
     } catch (error) {
       console.error('Error parsing OpenAI response:', error);
@@ -54,13 +60,13 @@ serve(async (req) => {
       imageUrl: '/placeholder.svg',
     }));
 
-    console.log('Sending response with activities:', activitiesWithImages);
+    console.log('Sending successful response with activities:', activitiesWithImages);
     return new Response(
       JSON.stringify({ activities: activitiesWithImages }),
       { 
         headers: { 
           ...corsHeaders, 
-          'Content-Type': 'application/json' 
+          'Content-Type': 'application/json',
         } 
       }
     );
@@ -69,13 +75,14 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to generate recommendations',
-        details: error.message 
+        details: error.message,
+        timestamp: new Date().toISOString(),
       }),
       { 
-        status: 500, 
+        status: error.status || 500, 
         headers: { 
           ...corsHeaders, 
-          'Content-Type': 'application/json' 
+          'Content-Type': 'application/json',
         } 
       }
     );

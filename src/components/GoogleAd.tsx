@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface GoogleAdProps {
   slot: string;
@@ -7,15 +7,34 @@ interface GoogleAdProps {
 }
 
 const GoogleAd = ({ slot, format = 'auto', style }: GoogleAdProps) => {
+  const [adError, setAdError] = useState<boolean>(false);
+
   useEffect(() => {
-    try {
-      // @ts-ignore
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      console.log('Ad push attempted');
-    } catch (error) {
-      console.error('Error loading Google Ad:', error);
-    }
-  }, []);
+    const loadAd = async () => {
+      try {
+        // @ts-ignore
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        console.log('Ad push attempted for slot:', slot);
+      } catch (error) {
+        console.log('Non-critical ad loading error:', error);
+        setAdError(true);
+      }
+    };
+
+    // Add error event listener for ad failures
+    window.addEventListener('error', (e) => {
+      if (e.target instanceof HTMLElement && e.target.tagName === 'SCRIPT' && e.target.src.includes('pagead2.googlesyndication.com')) {
+        console.log('Non-critical Google AdSense script error - this is normal in development');
+        e.preventDefault();
+      }
+    }, true);
+
+    loadAd();
+  }, [slot]);
+
+  if (adError) {
+    return null; // Don't render anything if there's an error
+  }
 
   return (
     <div className="google-ad-container my-4" style={style}>
