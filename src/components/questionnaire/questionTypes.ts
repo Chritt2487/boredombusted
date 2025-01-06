@@ -16,14 +16,18 @@ export type Question = {
 
 export type AnswersType = {
   initialChoice: string;
-  age: string;
-  activityLevel: string;
-  activityType: string;
-  environment: string;
-  competitive: string;
-  skills: string;
-  timeCommitment: string;
-  budget: string;
-  social: string;
+  age?: string;
+  activityLevel?: string;
+  activityType?: string;
+  environment?: string;
+  competitive?: string;
+  skills?: string;
+  timeCommitment?: string;
+  budget?: string;
+  social?: string;
   isRandom?: boolean;
+  // Refinement questions
+  pace?: string;
+  learningStyle?: string;
+  timeOfDay?: string;
 };

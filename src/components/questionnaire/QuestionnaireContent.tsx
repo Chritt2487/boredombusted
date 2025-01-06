@@ -1,4 +1,5 @@
 import { questions, shouldShowQuestion, getNextQuestion } from "./questions";
+import { refinementQuestions } from "./refinementQuestions";
 import QuestionCard from "./QuestionCard";
 import type { AnswersType } from "./questionTypes";
 
@@ -8,6 +9,7 @@ interface QuestionnaireContentProps {
   answers: Partial<AnswersType>;
   setAnswers: React.Dispatch<React.SetStateAction<Partial<AnswersType>>>;
   setIsComplete: (isComplete: boolean) => void;
+  isRefinement?: boolean;
 }
 
 export default function QuestionnaireContent({
@@ -16,11 +18,14 @@ export default function QuestionnaireContent({
   answers,
   setAnswers,
   setIsComplete,
+  isRefinement = false,
 }: QuestionnaireContentProps) {
+  const questionSet = isRefinement ? refinementQuestions : questions;
+
   const handleOptionSelect = (value: string) => {
     setAnswers((prev: Partial<AnswersType>) => ({
       ...prev,
-      [questions[currentStep].field]: value,
+      [questionSet[currentStep].field]: value,
     }));
   };
 
@@ -35,9 +40,9 @@ export default function QuestionnaireContent({
     }
   };
 
-  const currentQuestion = questions[currentStep];
+  const currentQuestion = questionSet[currentStep];
   const currentValue = answers[currentQuestion.field as keyof typeof answers] as string;
-  const totalSteps = questions.filter(q => shouldShowQuestion(q, answers)).length;
+  const totalSteps = questionSet.filter(q => shouldShowQuestion(q, answers)).length;
 
   return (
     <QuestionCard
