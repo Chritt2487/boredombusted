@@ -30,6 +30,11 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
     refetch
   } = useActivityData(answers, activities.map(a => a.name));
 
+  // Update activities when new data arrives
+  if (newActivities && activities.length === 0) {
+    setActivities(newActivities);
+  }
+
   const handleLoadMore = async () => {
     await refetch();
     if (newActivities) {
