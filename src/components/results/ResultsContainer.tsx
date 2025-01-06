@@ -6,6 +6,9 @@ import LoadingState from "./LoadingState";
 import ResultsHeader from "./ResultsHeader";
 import ResultsGrid from "./ResultsGrid";
 import LoadMoreButton from "./LoadMoreButton";
+import RefinementQuestionnaireContainer from "../questionnaire/RefinementQuestionnaireContainer";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 
 interface ResultsContainerProps {
   answers: {
@@ -16,12 +19,14 @@ interface ResultsContainerProps {
     budget: string;
     social: string;
     isRandom?: boolean;
+    isRefined?: boolean;
   };
 }
 
 export default function ResultsContainer({ answers }: ResultsContainerProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [showRefinement, setShowRefinement] = useState(false);
 
   const { 
     data: newActivities,
@@ -53,6 +58,10 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  if (showRefinement) {
+    return <RefinementQuestionnaireContainer previousAnswers={answers} />;
+  }
+
   if (isLoading && activities.length === 0) {
     return <LoadingState />;
   }
@@ -74,10 +83,21 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
         activities={activities}
         onSelectActivity={setSelectedActivity}
       />
-      <LoadMoreButton 
-        isLoading={isFetching}
-        onClick={handleLoadMore}
-      />
+      <div className="flex justify-center gap-4">
+        <LoadMoreButton 
+          isLoading={isFetching}
+          onClick={handleLoadMore}
+        />
+        {!answers.isRefined && (
+          <Button
+            onClick={() => setShowRefinement(true)}
+            className="bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
+          >
+            <Sparkles className="mr-2 h-4 w-4" />
+            Get More Personalized Results
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
