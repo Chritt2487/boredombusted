@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Tag } from "lucide-react";
 import ActivityImage from "./activity-card/ActivityImage";
 import ActivityDetails from "./activity-card/ActivityDetails";
 import ShareButton from "./activity-card/ShareButton";
@@ -22,6 +22,7 @@ interface ActivityCardProps {
 
 export default function ActivityCard({ activity, onSelect }: ActivityCardProps) {
   const [affiliateId, setAffiliateId] = useState('default-tag');
+  const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
     const getAffiliateId = async () => {
@@ -33,8 +34,28 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
       }
     };
 
+    const fetchCategories = async () => {
+      console.log('Fetching categories for activity:', activity.name);
+      const { data, error } = await supabase
+        .from('activity_categories')
+        .select('category')
+        .eq('activity_name', activity.name);
+      
+      if (error) {
+        console.error('Error fetching categories:', error);
+        return;
+      }
+
+      if (data) {
+        const categoryList = data.map(item => item.category);
+        console.log('Retrieved categories:', categoryList);
+        setCategories(categoryList);
+      }
+    };
+
     getAffiliateId();
-  }, []);
+    fetchCategories();
+  }, [activity.name]);
 
   const handleShopClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,11 +64,20 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
     window.open(amazonSearchUrl, '_blank');
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      onSelect(activity);
+    }
+  };
+
   return (
     <Card 
-      className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow duration-200"
+      className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-[#7E69AB] focus-visible:outline-none"
       role="article"
       aria-label={`Activity card for ${activity.name}`}
+      tabIndex={0}
+      onKeyDown={handleKeyPress}
+      onClick={() => onSelect(activity)}
     >
       <CardHeader>
         <div className="w-full h-48 rounded-lg overflow-hidden mb-4 relative">
@@ -57,6 +87,19 @@ export default function ActivityCard({ activity, onSelect }: ActivityCardProps) 
           <CardTitle className="text-xl text-[#7E69AB]">{activity.name}</CardTitle>
           <ShareButton activity={activity} />
         </div>
+        {categories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {categories.map((category, index) => (
+              <div
+                key={index}
+                className="flex items-center bg-[#F1F0FB] px-2 py-1 rounded-full text-sm text-[#7E69AB]"
+              >
+                <Tag className="w-3 h-3 mr-1" />
+                {category}
+              </div>
+            ))}
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-gray-600">{activity.description}</p>
