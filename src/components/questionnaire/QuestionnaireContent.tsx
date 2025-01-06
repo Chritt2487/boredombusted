@@ -6,7 +6,7 @@ interface QuestionnaireContentProps {
   currentStep: number;
   setCurrentStep: (step: number) => void;
   answers: Partial<AnswersType>;
-  setAnswers: (answers: Partial<AnswersType>) => void;
+  setAnswers: React.Dispatch<React.SetStateAction<Partial<AnswersType>>>;
   setIsComplete: (isComplete: boolean) => void;
 }
 
@@ -18,7 +18,7 @@ export default function QuestionnaireContent({
   setIsComplete,
 }: QuestionnaireContentProps) {
   const handleOptionSelect = (value: string) => {
-    setAnswers((prev) => ({
+    setAnswers((prev: Partial<AnswersType>) => ({
       ...prev,
       [questions[currentStep].field]: value,
     }));

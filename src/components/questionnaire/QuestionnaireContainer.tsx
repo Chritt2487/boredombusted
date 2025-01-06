@@ -1,6 +1,5 @@
 import { useState } from "react";
 import ResultsDisplay from "../ResultsDisplay";
-import QuestionnaireProgress from "./QuestionnaireProgress";
 import QuestionnaireContent from "./QuestionnaireContent";
 import type { AnswersType } from "./questionTypes";
 

@@ -16,16 +16,16 @@ export default function DetailContainer({
   onSelectAlternative 
 }: DetailContainerProps) {
   const { 
-    details,
-    isLoading,
-    error
+    detailedInfo,
+    loading,
+    similarActivities
   } = useActivityDetail(activity.name);
 
-  if (isLoading) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (error) {
+  if (!detailedInfo) {
     return <div>Error loading details</div>;
   }
 
@@ -37,7 +37,7 @@ export default function DetailContainer({
       />
       <DetailContent 
         activity={activity}
-        details={details}
+        details={detailedInfo}
         onSelectAlternative={onSelectAlternative}
       />
     </div>

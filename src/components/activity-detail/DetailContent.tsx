@@ -1,5 +1,5 @@
 import { Activity } from "../results/types";
-import { ActivityDetail } from "./types";
+import { DetailedActivity } from "./types";
 import BenefitsSection from "../sections/BenefitsSection";
 import GettingStartedSection from "../sections/GettingStartedSection";
 import EquipmentSection from "../sections/EquipmentSection";
@@ -7,7 +7,7 @@ import AlternativesSection from "../sections/AlternativesSection";
 
 interface DetailContentProps {
   activity: Activity;
-  details: ActivityDetail;
+  details: DetailedActivity;
   onSelectAlternative: (alternative: { name: string; description: string }) => void;
 }
 
@@ -18,17 +18,17 @@ export default function DetailContent({
 }: DetailContentProps) {
   return (
     <div className="space-y-8">
-      {(details.skills || details.healthBenefits) && (
+      {(details.benefits?.skills || details.benefits?.health) && (
         <BenefitsSection 
-          skills={details.skills}
-          health={details.healthBenefits}
+          skills={details.benefits?.skills}
+          health={details.benefits?.health}
         />
       )}
       
-      {(details.steps || details.beginnerTips) && (
+      {(details.gettingStarted?.steps || details.gettingStarted?.beginnerTips) && (
         <GettingStartedSection 
-          steps={details.steps}
-          beginnerTips={details.beginnerTips}
+          steps={details.gettingStarted?.steps}
+          beginnerTips={details.gettingStarted?.beginnerTips}
         />
       )}
       
