@@ -1,7 +1,7 @@
-import { questions as initialQuestions, shouldShowQuestion, getNextQuestion } from "./questions";
+import { allQuestions, shouldShowQuestion, getNextQuestion } from "./questions";
 import QuestionCard from "./QuestionCard";
-import type { AnswersType } from "./questionTypes";
-import type { Question } from "./questionTypes";
+import type { AnswersType } from "./types/questionTypes";
+import type { Question } from "./types/questionTypes";
 import { QuestionnaireAnswers } from "@/types/activity";
 
 interface QuestionnaireContentProps {
@@ -20,7 +20,7 @@ export default function QuestionnaireContent({
   answers,
   setAnswers,
   setIsComplete,
-  questions = initialQuestions,
+  questions = allQuestions,
   previousAnswers,
 }: QuestionnaireContentProps) {
   const handleOptionSelect = (value: string) => {
@@ -34,7 +34,7 @@ export default function QuestionnaireContent({
     const nextQuestionIndex = getNextQuestionIndex(currentStep);
     
     if (nextQuestionIndex === -1) {
-      console.log("Collected answers:", answers);
+      console.log("Questionnaire complete. Collected answers:", answers);
       setIsComplete(true);
     } else {
       setCurrentStep(nextQuestionIndex);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ResultsDisplay from "../ResultsDisplay";
 import QuestionnaireContent from "./QuestionnaireContent";
-import type { AnswersType } from "./questionTypes";
+import type { AnswersType } from "./types/questionTypes";
 
 interface QuestionnaireContainerProps {
   initialChoice: string;
@@ -13,6 +13,9 @@ export default function QuestionnaireContainer({ initialChoice }: QuestionnaireC
     initialChoice,
   });
   const [isComplete, setIsComplete] = useState(false);
+
+  console.log('Current answers:', answers);
+  console.log('Current step:', currentStep);
 
   // If "Surprise me" is selected, skip the questionnaire
   if (initialChoice === "Surprise me") {
