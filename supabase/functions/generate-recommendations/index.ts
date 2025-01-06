@@ -36,7 +36,10 @@ serve(async (req) => {
     console.log('Existing activities:', existingActivities);
     
     const prompt = generatePrompt(answers, existingActivities);
+    console.log('Generated prompt:', prompt);
+
     const gptData = await generateOpenAIResponse(openAIApiKey, prompt);
+    console.log('Received GPT response:', gptData);
     
     if (!gptData.choices?.[0]?.message?.content) {
       console.error('Invalid OpenAI response structure:', gptData);
@@ -65,7 +68,7 @@ serve(async (req) => {
       JSON.stringify({ activities: activitiesWithImages }),
       { 
         headers: { 
-          ...corsHeaders, 
+          ...corsHeaders,
           'Content-Type': 'application/json',
         } 
       }
@@ -81,7 +84,7 @@ serve(async (req) => {
       { 
         status: error.status || 500, 
         headers: { 
-          ...corsHeaders, 
+          ...corsHeaders,
           'Content-Type': 'application/json',
         } 
       }
