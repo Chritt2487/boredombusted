@@ -4,6 +4,7 @@ import BenefitsSection from "../sections/BenefitsSection";
 import GettingStartedSection from "../sections/GettingStartedSection";
 import EquipmentSection from "../sections/EquipmentSection";
 import AlternativesSection from "../sections/AlternativesSection";
+import ShopSection from "../sections/ShopSection";
 
 interface DetailContentProps {
   activity: Activity;
@@ -31,6 +32,8 @@ export default function DetailContent({
           beginnerTips={details.gettingStarted?.beginnerTips}
         />
       )}
+      
+      <ShopSection activityName={activity.name} />
       
       {details.equipment && details.equipment.length > 0 && (
         <EquipmentSection equipment={details.equipment} />
