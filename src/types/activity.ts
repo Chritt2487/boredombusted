@@ -1,5 +1,6 @@
 export interface QuestionnaireAnswers {
   initialChoice: string;
+  age?: string;
   activityLevel?: string;
   activityType?: string;
   environment?: string;

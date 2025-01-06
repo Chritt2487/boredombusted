@@ -38,7 +38,7 @@ function getSearchKeywords(activityName: string): string[] {
   }
 
   // If no specific mapping found, use the activity name plus some general terms
-  return [activityName, "activity", "lifestyle", "hobby"];
+  return [activityName, "activity", "lifestyle", "hobby", "family-friendly"];
 }
 
 function getFallbackCategory(activityName: string): string {
@@ -83,14 +83,17 @@ serve(async (req) => {
     const searchKeywords = getSearchKeywords(activityName);
     console.log('Using search keywords:', searchKeywords);
 
+    // Add safety parameters to ensure family-friendly content
+    const safetyParams = '&safesearch=true&category=activities,people,education,sports';
+
     // Try each keyword until we find a suitable image
     let imageFound = false;
     let selectedImage = null;
 
     for (const keyword of searchKeywords) {
-      const searchQuery = encodeURIComponent(keyword);
+      const searchQuery = encodeURIComponent(keyword + ' family friendly');
       const response = await fetch(
-        `https://pixabay.com/api/?key=${pixabayKey}&q=${searchQuery}&image_type=photo&orientation=horizontal&per_page=3&safesearch=true&min_width=800`
+        `https://pixabay.com/api/?key=${pixabayKey}&q=${searchQuery}&image_type=photo&orientation=horizontal&per_page=3${safetyParams}&min_width=800`
       );
 
       if (!response.ok) {

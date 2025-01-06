@@ -25,6 +25,12 @@ export function generatePrompt(answers: UserAnswers, existingActivities: string[
     "Long (3+ hours)": "activities that take more than 3 hours"
   };
 
+  const ageRestrictions = {
+    child: "STRICTLY child-safe activities only. No dangerous tools, no online interactions with strangers, must require adult supervision where appropriate. Focus on educational and fun activities.",
+    teen: "Age-appropriate activities for teenagers. No dangerous activities, nothing explicit or inappropriate. Focus on skill-building and social activities with proper safety considerations.",
+    adult: "Adult-appropriate activities while maintaining family-friendly content. No explicit, violent, or inappropriate suggestions."
+  };
+
   const refinementContext = answers.isRefined 
     ? `
     Additional strict requirements:
@@ -46,6 +52,14 @@ export function generatePrompt(answers: UserAnswers, existingActivities: string[
 
   return `Generate 4 activity recommendations that STRICTLY match these requirements:
 
+    CRITICAL SAFETY AND CONTENT REQUIREMENTS:
+    - Age Group: ${answers.age} (${ageRestrictions[answers.age]})
+    - ALL content must be family-friendly
+    - NO explicit, sexual, or violent content
+    - NO dangerous activities
+    - NO inappropriate themes or suggestions
+    - Include appropriate safety warnings and adult supervision requirements where needed
+
     Core Requirements (ALL must be met):
     - Activity Type: ${answers.activityType}
     - Environment: ${answers.environment} activities only
@@ -58,8 +72,8 @@ export function generatePrompt(answers: UserAnswers, existingActivities: string[
     IMPORTANT:
     1. Do NOT include any of these existing activities: ${existingActivities.join(', ')}
     2. Each activity MUST strictly adhere to ALL requirements above
-    3. Activities should be specific and actionable
-    4. Include practical tips for implementation
+    3. Activities should be specific, actionable, and age-appropriate
+    4. Include practical tips for implementation and safety considerations
 
     Return ONLY a valid JSON object with this exact structure:
     {
@@ -67,7 +81,7 @@ export function generatePrompt(answers: UserAnswers, existingActivities: string[
         {
           "name": "Specific Activity Name",
           "description": "Detailed description (2-3 sentences)",
-          "tips": ["3-4 practical tips for getting started"]
+          "tips": ["3-4 practical tips for getting started, including safety considerations"]
         }
       ]
     }`;
@@ -93,6 +107,23 @@ export function validateActivities(activities: Activity[]): void {
     
     if (activity.description.split('.').length < 2) {
       throw new Error(`Activity at index ${index} description must be at least 2 sentences`);
+    }
+
+    // Check for potentially inappropriate content
+    const inappropriateTerms = [
+      'explicit', 'sexual', 'violent', 'dangerous', 'weapon', 'drug', 'alcohol',
+      'gambling', 'inappropriate', 'adult content', 'mature'
+    ];
+
+    const contentToCheck = [
+      activity.name.toLowerCase(),
+      activity.description.toLowerCase(),
+      ...activity.tips.map(tip => tip.toLowerCase())
+    ].join(' ');
+
+    const foundTerms = inappropriateTerms.filter(term => contentToCheck.includes(term));
+    if (foundTerms.length > 0) {
+      throw new Error(`Activity at index ${index} contains inappropriate content: ${foundTerms.join(', ')}`);
     }
   });
 }
