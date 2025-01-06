@@ -42,5 +42,26 @@ export const basicQuestions: Question[] = [
       }
     ],
     field: "activityLevel"
+  },
+  {
+    title: "Do you have any mobility considerations?",
+    options: [
+      {
+        value: "full",
+        label: "Full Mobility",
+        description: "No physical limitations"
+      },
+      {
+        value: "some",
+        label: "Some Limitations",
+        description: "Prefer activities with moderate physical demands"
+      },
+      {
+        value: "seated",
+        label: "Seated Activities",
+        description: "Prefer activities that can be done while seated"
+      }
+    ],
+    field: "mobility"
   }
 ];

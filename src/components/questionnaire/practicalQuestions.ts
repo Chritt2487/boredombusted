@@ -49,24 +49,44 @@ export const practicalQuestions: Question[] = [
     field: "budget"
   },
   {
-    title: "Who would you like to do this with?",
+    title: "What equipment do you have available?",
     options: [
-      { 
-        value: "Solo", 
-        label: "By Myself",
-        description: "Solo activities"
+      {
+        value: "none",
+        label: "No Equipment",
+        description: "Activities requiring no special equipment"
       },
-      { 
-        value: "With friends", 
-        label: "With Others",
-        description: "Group or social activities"
+      {
+        value: "basic",
+        label: "Basic Household Items",
+        description: "Common items found at home"
       },
-      { 
-        value: "Either", 
-        label: "Either Way",
-        description: "Flexible with solo or group activities"
+      {
+        value: "purchase",
+        label: "Willing to Purchase",
+        description: "Open to buying necessary equipment"
       }
     ],
-    field: "social"
+    field: "equipment",
+    dependsOn: {
+      field: "budget",
+      values: ["Cheap", "Moderate", "Expensive"]
+    }
+  },
+  {
+    title: "How flexible is your schedule?",
+    options: [
+      {
+        value: "fixed",
+        label: "Fixed Schedule",
+        description: "Need specific time slots"
+      },
+      {
+        value: "flexible",
+        label: "Flexible Timing",
+        description: "Can adjust timing as needed"
+      }
+    ],
+    field: "scheduleFlexibility"
   }
 ];

@@ -27,27 +27,6 @@ export const refinementQuestions: Question[] = [
     }
   },
   {
-    title: "How quickly would you like to see progress?",
-    options: [
-      { 
-        value: "Quick", 
-        label: "Quick Progress",
-        description: "See results within a few sessions"
-      },
-      { 
-        value: "Moderate", 
-        label: "Moderate Pace",
-        description: "Steady progress over weeks"
-      },
-      { 
-        value: "Gradual", 
-        label: "Gradual Development",
-        description: "Focus on long-term mastery"
-      }
-    ],
-    field: "learningCurve"
-  },
-  {
     title: "What's your preferred time of day?",
     options: [
       { 
@@ -74,28 +53,53 @@ export const refinementQuestions: Question[] = [
     field: "timeOfDay"
   },
   {
-    title: "Do you prefer structured or flexible activities?",
+    title: "What's your preferred group size?",
     options: [
-      { 
-        value: "Structured", 
-        label: "Structured",
-        description: "Activities with clear steps and guidelines"
+      {
+        value: "oneOnOne",
+        label: "1-on-1",
+        description: "Individual or paired activities"
       },
-      { 
-        value: "Flexible", 
-        label: "Flexible",
-        description: "Activities with room for creativity and adaptation"
+      {
+        value: "small",
+        label: "Small Group (3-5)",
+        description: "Small group activities"
       },
-      { 
-        value: "Mixed", 
-        label: "Mix of Both",
-        description: "Balance of structure and flexibility"
+      {
+        value: "large",
+        label: "Larger Group",
+        description: "Activities with more participants"
       }
     ],
-    field: "structure",
+    field: "groupSize",
     dependsOn: {
-      field: "activityType",
-      values: ["Learning & Skills", "Creative Expression"]
+      field: "social",
+      values: ["With friends", "Either"]
+    }
+  },
+  {
+    title: "What level of social interaction do you prefer?",
+    options: [
+      {
+        value: "minimal",
+        label: "Minimal",
+        description: "Limited interaction with others"
+      },
+      {
+        value: "moderate",
+        label: "Moderate",
+        description: "Balanced social interaction"
+      },
+      {
+        value: "high",
+        label: "High",
+        description: "Lots of social interaction"
+      }
+    ],
+    field: "socialLevel",
+    dependsOn: {
+      field: "social",
+      values: ["With friends", "Either"]
     }
   }
 ];

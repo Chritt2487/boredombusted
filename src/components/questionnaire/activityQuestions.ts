@@ -52,5 +52,51 @@ export const activityQuestions: Question[] = [
       }
     ],
     field: "environment"
+  },
+  {
+    title: "What kind of physical space do you have available?",
+    options: [
+      {
+        value: "small",
+        label: "Small Room",
+        description: "Limited space like a bedroom or small office"
+      },
+      {
+        value: "large",
+        label: "Large Room",
+        description: "Spacious indoor area like a living room or garage"
+      },
+      {
+        value: "outdoor",
+        label: "Outdoor Space",
+        description: "Access to yard, park, or other outdoor areas"
+      }
+    ],
+    field: "spaceAvailable"
+  },
+  {
+    title: "What's your weather preference?",
+    options: [
+      {
+        value: "indoor",
+        label: "Indoor Only",
+        description: "Prefer activities protected from weather"
+      },
+      {
+        value: "any",
+        label: "Any Weather",
+        description: "Weather doesn't affect my activities"
+      },
+      {
+        value: "fair",
+        label: "Fair Weather",
+        description: "Prefer good weather conditions"
+      }
+    ],
+    field: "weatherPreference",
+    dependsOn: {
+      field: "environment",
+      values: ["Outdoor", "Both"]
+    }
   }
 ];
