@@ -50,7 +50,7 @@ export function generatePrompt(answers: UserAnswers, existingActivities: string[
       * Mixed: combination of both`
     : '';
 
-  return `Generate 4 activity recommendations that STRICTLY match these requirements:
+  return `Generate 2-6 activity recommendations that STRICTLY match these requirements:
 
     CRITICAL SAFETY AND CONTENT REQUIREMENTS:
     - Age Group: ${answers.age} (${ageRestrictions[answers.age]})
@@ -88,28 +88,36 @@ export function generatePrompt(answers: UserAnswers, existingActivities: string[
 }
 
 export function validateActivities(activities: Activity[]): void {
+  console.log('Validating activities:', activities);
+  
   if (!Array.isArray(activities)) {
+    console.error('Response missing activities array');
     throw new Error('Response missing activities array');
   }
   
-  if (activities.length !== 4) {
-    throw new Error('Expected exactly 4 activities');
+  if (activities.length < 2 || activities.length > 6) {
+    console.error(`Invalid number of activities: ${activities.length}. Expected between 2 and 6 activities.`);
+    throw new Error(`Invalid number of activities: ${activities.length}. Expected between 2 and 6 activities.`);
   }
   
   activities.forEach((activity, index) => {
+    console.log(`Validating activity ${index + 1}:`, activity);
+    
     if (!activity.name || !activity.description || !Array.isArray(activity.tips)) {
+      console.error(`Activity at index ${index} has invalid structure:`, activity);
       throw new Error(`Activity at index ${index} has invalid structure`);
     }
     
     if (activity.tips.length < 2) {
+      console.error(`Activity at index ${index} has insufficient tips:`, activity.tips);
       throw new Error(`Activity at index ${index} must have at least 2 tips`);
     }
     
     if (activity.description.split('.').length < 2) {
+      console.error(`Activity at index ${index} has insufficient description:`, activity.description);
       throw new Error(`Activity at index ${index} description must be at least 2 sentences`);
     }
 
-    // Updated list of inappropriate terms to be more specific and avoid false positives
     const inappropriateTerms = [
       'explicit content',
       'sexual content',
@@ -131,6 +139,7 @@ export function validateActivities(activities: Activity[]): void {
 
     const foundTerms = inappropriateTerms.filter(term => contentToCheck.includes(term));
     if (foundTerms.length > 0) {
+      console.error(`Activity at index ${index} contains prohibited content:`, foundTerms);
       throw new Error(`Activity at index ${index} contains prohibited content: ${foundTerms.join(', ')}`);
     }
   });
