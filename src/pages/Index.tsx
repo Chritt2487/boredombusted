@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Header from "@/components/landing/Header";
-import InitialChoiceCard from "@/components/landing/InitialChoiceCard";
 import ContentContainer from "@/components/landing/ContentContainer";
 
 const Index = () => {
@@ -24,6 +23,8 @@ const Index = () => {
         <ContentContainer 
           showForm={showForm}
           selectedOption={selectedOption}
+          onOptionSelect={handleOptionSelect}
+          onContinue={handleContinue}
         />
       </div>
     </div>

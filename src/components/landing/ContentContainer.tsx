@@ -6,9 +6,16 @@ import InitialChoiceCard from "./InitialChoiceCard";
 interface ContentContainerProps {
   showForm: boolean;
   selectedOption: string;
+  onOptionSelect: (value: string) => void;
+  onContinue: () => void;
 }
 
-export default function ContentContainer({ showForm, selectedOption }: ContentContainerProps) {
+export default function ContentContainer({ 
+  showForm, 
+  selectedOption,
+  onOptionSelect,
+  onContinue 
+}: ContentContainerProps) {
   return (
     <ErrorBoundary>
       {showForm ? (
@@ -16,8 +23,8 @@ export default function ContentContainer({ showForm, selectedOption }: ContentCo
       ) : (
         <InitialChoiceCard 
           selectedOption={selectedOption}
-          onOptionSelect={(value: string) => {}}
-          onContinue={() => {}}
+          onOptionSelect={onOptionSelect}
+          onContinue={onContinue}
         />
       )}
     </ErrorBoundary>
