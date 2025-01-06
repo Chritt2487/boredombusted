@@ -6,13 +6,22 @@ export const corsHeaders = {
 };
 
 export function generatePrompt(answers: UserAnswers, existingActivities: string[] = []): string {
+  const refinementContext = answers.isRefined 
+    ? `Additional preferences:
+    - Competitiveness: ${answers.competitiveness || 'Not specified'}
+    - Learning Curve: ${answers.learningCurve || 'Not specified'}
+    - Time of Day: ${answers.timeOfDay || 'Not specified'}
+    - Structure: ${answers.structure || 'Not specified'}`
+    : '';
+
   return `Based on these preferences:
     - Main interest: ${answers.initialChoice}
-    - Environment: ${answers.environment}
-    - Activity Level: ${answers.activityLevel}
-    - Time Commitment: ${answers.timeCommitment}
-    - Budget: ${answers.budget}
-    - Social Setting: ${answers.social}
+    - Environment: ${answers.environment || 'Not specified'}
+    - Activity Level: ${answers.activityLevel || 'Not specified'}
+    - Time Commitment: ${answers.timeCommitment || 'Not specified'}
+    - Budget: ${answers.budget || 'Not specified'}
+    - Social Setting: ${answers.social || 'Not specified'}
+    ${refinementContext}
 
     Generate 4 activity recommendations that are NOT in this list: ${existingActivities.join(', ')}
     

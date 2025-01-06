@@ -6,5 +6,5 @@ interface ResultsDisplayProps {
 }
 
 export default function ResultsDisplay({ answers }: ResultsDisplayProps) {
-  return <ResultsContainer answers={answers} />;
+  return <ResultsContainer answers={answers as any} />;
 }

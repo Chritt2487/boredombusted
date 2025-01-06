@@ -1,6 +1,6 @@
 export interface QuestionnaireAnswers {
   initialChoice: string;
-  activityLevel: string;
+  activityLevel?: string;
   activityType?: string;
   environment?: string;
   skills?: string;
@@ -12,7 +12,8 @@ export interface QuestionnaireAnswers {
   difficulty?: string;
   timeOfDay?: string;
   structure?: string;
-  equipment?: string;
+  competitiveness?: string;
+  learningCurve?: string;
 }
 
 export interface Activity {

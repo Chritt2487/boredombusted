@@ -2,29 +2,50 @@ import { Question } from './questionTypes';
 
 export const refinementQuestions: Question[] = [
   {
-    title: "How challenging would you like the activity to be?",
+    title: "How competitive would you like the activity to be?",
     options: [
       { 
-        value: "Easy", 
-        label: "Beginner Friendly",
-        description: "Activities suitable for newcomers"
+        value: "NonCompetitive", 
+        label: "Non-competitive",
+        description: "Focus on personal enjoyment and growth"
       },
       { 
-        value: "Moderate", 
-        label: "Some Challenge",
-        description: "Activities requiring moderate effort or skill"
+        value: "MildlyCompetitive", 
+        label: "Mildly Competitive",
+        description: "Some friendly competition or personal goals"
       },
       { 
-        value: "Challenging", 
-        label: "Quite Challenging",
-        description: "Activities that push your limits"
+        value: "VeryCompetitive", 
+        label: "Very Competitive",
+        description: "Strong focus on achievement and competition"
       }
     ],
-    field: "difficulty",
+    field: "competitiveness",
     dependsOn: {
       field: "activityType",
       values: ["Physical Activity", "Learning & Skills"]
     }
+  },
+  {
+    title: "How quickly would you like to see progress?",
+    options: [
+      { 
+        value: "Quick", 
+        label: "Quick Progress",
+        description: "See results within a few sessions"
+      },
+      { 
+        value: "Moderate", 
+        label: "Moderate Pace",
+        description: "Steady progress over weeks"
+      },
+      { 
+        value: "Gradual", 
+        label: "Gradual Development",
+        description: "Focus on long-term mastery"
+      }
+    ],
+    field: "learningCurve"
   },
   {
     title: "What's your preferred time of day?",
@@ -75,31 +96,6 @@ export const refinementQuestions: Question[] = [
     dependsOn: {
       field: "activityType",
       values: ["Learning & Skills", "Creative Expression"]
-    }
-  },
-  {
-    title: "Would you like equipment to be provided?",
-    options: [
-      { 
-        value: "Provided", 
-        label: "Yes, Equipment Provided",
-        description: "Activities where equipment is included or rentable"
-      },
-      { 
-        value: "BringOwn", 
-        label: "I'll Bring My Own",
-        description: "Activities where you use your own equipment"
-      },
-      { 
-        value: "NoEquipment", 
-        label: "No Equipment Needed",
-        description: "Activities that don't require special equipment"
-      }
-    ],
-    field: "equipment",
-    dependsOn: {
-      field: "activityType",
-      values: ["Physical Activity", "Creative Expression"]
     }
   }
 ];
