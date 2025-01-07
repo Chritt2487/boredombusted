@@ -2,6 +2,7 @@ import React from 'react';
 import ErrorBoundary from "@/components/ErrorBoundary";
 import QuestionnaireForm from "@/components/QuestionnaireForm";
 import InitialChoiceCard from "./InitialChoiceCard";
+import ResultsDisplay from "../ResultsDisplay";
 
 interface ContentContainerProps {
   showForm: boolean;
@@ -16,6 +17,19 @@ export default function ContentContainer({
   onOptionSelect,
   onContinue 
 }: ContentContainerProps) {
+  // If "surprise me" is selected, directly show results
+  if (selectedOption === "surprise me") {
+    console.log('Surprise me selected, bypassing questionnaire');
+    return (
+      <ErrorBoundary>
+        <ResultsDisplay answers={{ 
+          initialChoice: selectedOption,
+          isRandom: true 
+        }} />
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
       {showForm ? (
