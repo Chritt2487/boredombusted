@@ -5,6 +5,9 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
   console.log('Using temperature:', temperature);
   
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+
     const response = await fetch(OPENAI_URL, {
       method: 'POST',
       headers: {
@@ -12,7 +15,7 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',  // Changed from gpt-4o to gpt-4o-mini for cost efficiency
+        model: 'gpt-4o-mini',
         messages: [
           { 
             role: 'system', 
@@ -21,17 +24,19 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
           { role: 'user', content: prompt }
         ],
         temperature: temperature,
-        max_tokens: 2000,
+        max_tokens: 1000, // Reduced from 2000 to improve response time
         n: 1
       }),
+      signal: controller.signal
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI API error:', errorText);
       
-      // Check specifically for quota errors
-      if (errorText.includes('insufficient_quota')) {
+      if (errorText.includes('insufficient_quota') || response.status === 429) {
         throw new Error('OpenAI API quota exceeded. Please update your API key.');
       }
       
@@ -42,6 +47,10 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
     console.log('Received response from OpenAI:', data);
     return data;
   } catch (error) {
+    if (error.name === 'AbortError') {
+      console.error('Request timed out');
+      throw new Error('Request timed out after 25 seconds');
+    }
     console.error('Error in OpenAI request:', error);
     throw error;
   }
