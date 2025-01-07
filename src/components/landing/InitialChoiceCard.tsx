@@ -33,7 +33,7 @@ export default function InitialChoiceCard({
       description: "Find meaningful projects and self-improvement activities"
     },
     {
-      value: "Surprise me",
+      value: "surprise me",
       description: "Get a random activity suggestion right away"
     },
   ];
