@@ -4,10 +4,6 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
   console.log('Sending request to OpenAI with prompt:', prompt);
   console.log('Using temperature:', temperature);
   
-  if (!openAIApiKey) {
-    throw new Error('OpenAI API key is not configured');
-  }
-
   const response = await fetch(OPENAI_URL, {
     method: 'POST',
     headers: {
@@ -15,11 +11,11 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [
         { 
           role: 'system', 
-          content: 'You are a specialized activity recommendation system. Generate engaging, safe, and appropriate activities based on user preferences. Focus on providing detailed, practical suggestions.' 
+          content: 'You are a JSON-only response generator specialized in activity recommendations. You must strictly follow all requirements provided and only return valid JSON objects that match the exact criteria specified. Be creative and unconventional while staying within safety guidelines.' 
         },
         { role: 'user', content: prompt }
       ],
@@ -32,15 +28,10 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
   if (!response.ok) {
     const errorText = await response.text();
     console.error('OpenAI API error:', errorText);
-    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+    throw new Error(`OpenAI API error: ${errorText}`);
   }
 
   const data = await response.json();
   console.log('Received response from OpenAI:', data);
-  
-  if (!data.choices?.[0]?.message?.content) {
-    throw new Error('Invalid response format from OpenAI');
-  }
-
   return data;
 }

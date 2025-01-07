@@ -9,7 +9,12 @@ const openAIApiKey = Deno.env.get('Open_AI_2');
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      headers: {
+        ...corsHeaders,
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      }
+    });
   }
 
   try {
@@ -34,39 +39,57 @@ serve(async (req) => {
     const weightedAnswers = applyWeightedParameters(answers);
     console.log('Weighted answers:', weightedAnswers);
 
-    // Try with a single temperature first for faster response
-    const prompt = generatePrompt(weightedAnswers, existingActivities);
-    console.log('Generated prompt:', prompt);
-    
-    try {
-      const gptData = await generateOpenAIResponse(openAIApiKey, prompt, 0.7);
-      console.log('Received GPT response:', gptData);
+    // Generate multiple prompts with different temperatures
+    const temperatures = [0.7, 0.85, 1.0];
+    const allResponses: RecommendationsResponse[] = [];
+
+    for (const temperature of temperatures) {
+      const prompt = generatePrompt(weightedAnswers, existingActivities);
+      console.log(`Generating response with temperature ${temperature}`);
       
-      const content = gptData.choices[0].message.content.trim();
-      console.log('Parsing OpenAI response:', content);
-      const recommendations = JSON.parse(content);
-      validateActivities(recommendations.activities);
-
-      // Add placeholder images
-      const activitiesWithImages = recommendations.activities.map(activity => ({
-        ...activity,
-        imageUrl: '/placeholder.svg',
-      }));
-
-      console.log('Sending successful response with activities:', activitiesWithImages);
-      return new Response(
-        JSON.stringify({ activities: activitiesWithImages }),
-        { 
-          headers: { 
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          } 
+      try {
+        const gptData = await generateOpenAIResponse(openAIApiKey, prompt, temperature);
+        console.log(`Received GPT response for temperature ${temperature}:`, gptData);
+        
+        if (!gptData.choices?.[0]?.message?.content) {
+          console.error('Invalid OpenAI response structure:', gptData);
+          continue;
         }
-      );
-    } catch (error) {
-      console.error('Error generating recommendations:', error);
-      throw new Error(`Failed to generate valid recommendations: ${error.message}`);
+
+        const content = gptData.choices[0].message.content.trim();
+        console.log('Parsing OpenAI response:', content);
+        const recommendations = JSON.parse(content);
+        validateActivities(recommendations.activities);
+        allResponses.push(recommendations);
+      } catch (error) {
+        console.error(`Error with temperature ${temperature}:`, error);
+        continue;
+      }
     }
+
+    if (allResponses.length === 0) {
+      throw new Error('Failed to generate valid recommendations with any temperature');
+    }
+
+    // Randomly select activities from all valid responses
+    const selectedResponse = allResponses[Math.floor(Math.random() * allResponses.length)];
+    
+    // Add placeholder images
+    const activitiesWithImages = selectedResponse.activities.map(activity => ({
+      ...activity,
+      imageUrl: '/placeholder.svg',
+    }));
+
+    console.log('Sending successful response with activities:', activitiesWithImages);
+    return new Response(
+      JSON.stringify({ activities: activitiesWithImages }),
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        } 
+      }
+    );
   } catch (error) {
     console.error('Error in generate-recommendations:', error);
     return new Response(
@@ -76,7 +99,7 @@ serve(async (req) => {
         timestamp: new Date().toISOString(),
       }),
       { 
-        status: 500, 
+        status: error.status || 500, 
         headers: { 
           ...corsHeaders,
           'Content-Type': 'application/json',
