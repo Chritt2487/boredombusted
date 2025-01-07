@@ -41,6 +41,20 @@ export default function QuestionnaireContent({
     }
   };
 
+  const handleBack = () => {
+    let previousIndex = currentStep - 1;
+    while (previousIndex >= 0) {
+      const question = customQuestions[previousIndex];
+      const relevantAnswers = previousAnswers ? { ...previousAnswers, ...answers } : answers;
+      
+      if (!question.dependsOn || shouldShowQuestion(question, relevantAnswers)) {
+        setCurrentStep(previousIndex);
+        break;
+      }
+      previousIndex--;
+    }
+  };
+
   const getNextQuestionIndex = (currentIndex: number): number => {
     let nextIndex = currentIndex + 1;
     
@@ -71,7 +85,9 @@ export default function QuestionnaireContent({
       selectedValue={currentValue}
       onSelect={handleOptionSelect}
       onNext={handleNext}
+      onBack={handleBack}
       isLastQuestion={getNextQuestionIndex(currentStep) === -1}
+      isFirstQuestion={currentStep === 0}
       currentStep={currentStep + 1}
       totalSteps={totalSteps}
     />

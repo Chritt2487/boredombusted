@@ -1,6 +1,8 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 import { QuestionOption } from "./questionTypes";
 import QuestionProgress from "./QuestionProgress";
 
@@ -10,7 +12,9 @@ interface QuestionCardProps {
   selectedValue: string;
   onSelect: (value: string) => void;
   onNext: () => void;
+  onBack: () => void;
   isLastQuestion: boolean;
+  isFirstQuestion: boolean;
   currentStep: number;
   totalSteps: number;
 }
@@ -21,7 +25,9 @@ export default function QuestionCard({
   selectedValue,
   onSelect,
   onNext,
+  onBack,
   isLastQuestion,
+  isFirstQuestion,
   currentStep,
   totalSteps,
 }: QuestionCardProps) {
@@ -38,7 +44,18 @@ export default function QuestionCard({
       <QuestionProgress currentStep={currentStep} totalSteps={totalSteps} />
       
       <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
-        <CardHeader>
+        <CardHeader className="relative">
+          {!isFirstQuestion && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onBack}
+              className="absolute left-4 top-4 text-[#7E69AB] hover:text-[#9b87f5] hover:bg-[#F1F0FB]"
+              aria-label="Go back to previous question"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
+          )}
           <CardTitle className="text-2xl md:text-3xl text-center text-[#7E69AB] font-bold">
             {title}
           </CardTitle>
