@@ -5,10 +5,10 @@ import ActivityDetail from "../ActivityDetail";
 import LoadingState from "./LoadingState";
 import ResultsHeader from "./ResultsHeader";
 import ResultsGrid from "./ResultsGrid";
-import LoadMoreButton from "./LoadMoreButton";
+import ActionButtons from "./ActionButtons";
+import NoResultsMessage from "./NoResultsMessage";
+import AffiliateDisclaimer from "./AffiliateDisclaimer";
 import RefinementQuestionnaireContainer from "../questionnaire/RefinementQuestionnaireContainer";
-import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
 
 interface ResultsContainerProps {
   answers: {
@@ -35,7 +35,7 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
     refetch
   } = useActivityData(answers, activities.map(a => a.name));
 
-  // Only update activities when initial data arrives
+  // Update activities when initial data arrives
   if (newActivities && activities.length === 0) {
     console.log('Received initial activities:', newActivities.length);
     setActivities(newActivities);
@@ -83,34 +83,24 @@ export default function ResultsContainer({ answers }: ResultsContainerProps) {
   return (
     <div className="space-y-8" role="main" aria-label="Activity recommendations">
       <ResultsHeader />
+      
       {activities.length > 0 ? (
         <ResultsGrid 
           activities={activities}
           onSelectActivity={setSelectedActivity}
         />
       ) : (
-        <p className="text-center text-gray-500">No activities found. Try adjusting your preferences.</p>
+        <NoResultsMessage />
       )}
+
       <div className="flex flex-col items-center gap-4">
-        <div className="flex gap-4">
-          <LoadMoreButton 
-            isLoading={isFetching}
-            onClick={handleLoadMore}
-          />
-          {!answers.isRefined && (
-            <Button
-              onClick={() => setShowRefinement(true)}
-              className="bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
-              aria-label="Get more personalized activity recommendations"
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              Get More Personalized Results
-            </Button>
-          )}
-        </div>
-        <p className="text-sm text-gray-500 italic text-center mt-4">
-          As an Amazon Associate, we may earn from qualifying purchases. This helps support our website at no additional cost to you.
-        </p>
+        <ActionButtons 
+          isLoading={isFetching}
+          onLoadMore={handleLoadMore}
+          showRefinement={!answers.isRefined}
+          onRefinement={() => setShowRefinement(true)}
+        />
+        <AffiliateDisclaimer />
       </div>
     </div>
   );
