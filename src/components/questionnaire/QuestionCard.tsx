@@ -39,7 +39,7 @@ export default function QuestionCard({
       
       <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="text-2xl text-center text-[#7E69AB]">
+          <CardTitle className="text-2xl md:text-3xl text-center text-[#7E69AB] font-bold">
             {title}
           </CardTitle>
         </CardHeader>
@@ -62,11 +62,13 @@ export default function QuestionCard({
                 <div className="flex items-center space-x-2 w-full">
                   <RadioGroupItem value={option.value} id={option.value} />
                   <div className="flex-grow">
-                    <Label htmlFor={option.value} className="cursor-pointer">
+                    <Label htmlFor={option.value} className="cursor-pointer text-lg font-semibold">
                       {option.label}
                     </Label>
                     {option.description && (
-                      <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                      <p className="text-base text-gray-600 mt-1 font-medium">
+                        {option.description}
+                      </p>
                     )}
                   </div>
                 </div>

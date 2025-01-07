@@ -33,6 +33,10 @@ export default function InitialChoiceCard({
       description: "Step out of your comfort zone with exciting experiences"
     },
     {
+      value: "Be productive",
+      description: "Find meaningful projects and self-improvement activities"
+    },
+    {
       value: "Surprise me",
       description: "Get a random activity suggestion right away"
     },
@@ -41,10 +45,10 @@ export default function InitialChoiceCard({
   return (
     <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm animate-fade-in">
       <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl text-center text-[#7E69AB]">
+        <CardTitle className="text-2xl md:text-3xl text-center text-[#7E69AB] font-bold">
           What are you looking to do?
         </CardTitle>
-        <p className="text-center text-gray-500 text-sm">
+        <p className="text-lg text-center text-gray-600 font-medium">
           Choose an option below and we'll help you find the perfect match
         </p>
       </CardHeader>
@@ -57,23 +61,24 @@ export default function InitialChoiceCard({
           {options.map((option) => (
             <div
               key={option.value}
-              className="flex items-center space-x-4 p-4 rounded-lg border border-[#D6BCFA] hover:bg-[#F1F0FB] cursor-pointer transition-colors duration-200"
+              className="flex items-center space-x-4 p-4 rounded-lg border-2 border-[#D6BCFA] hover:bg-[#F1F0FB] cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+              onClick={() => onOptionSelect(option.value)}
             >
               <div className="flex-grow">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value={option.value} id={option.value} />
-                  <Label htmlFor={option.value} className="cursor-pointer font-medium">
+                  <Label htmlFor={option.value} className="cursor-pointer text-lg font-semibold">
                     {option.value}
                   </Label>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                <p className="text-base text-gray-600 mt-1 font-medium">{option.description}</p>
               </div>
             </div>
           ))}
         </RadioGroup>
         <Button
           onClick={onContinue}
-          className="w-full mt-6 bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
+          className="w-full mt-6 bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200 text-lg font-semibold py-6"
           disabled={!selectedOption}
         >
           Continue

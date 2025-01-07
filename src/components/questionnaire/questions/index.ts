@@ -4,9 +4,11 @@ import { activityQuestions } from './activityQuestions';
 import { practicalQuestions } from './practicalQuestions';
 import { socialQuestions } from './socialQuestions';
 import { learningQuestions } from './learningQuestions';
+import { productivityQuestions } from './productivityQuestions';
 
 export const allQuestions: Question[] = [
   ...basicQuestions,
+  ...productivityQuestions, // Add the new productivity questions
   ...activityQuestions,
   ...practicalQuestions,
   ...socialQuestions,
@@ -18,6 +20,7 @@ export * from './activityQuestions';
 export * from './practicalQuestions';
 export * from './socialQuestions';
 export * from './learningQuestions';
+export * from './productivityQuestions';
 
 export const shouldShowQuestion = (question: Question, answers: Record<string, any>): boolean => {
   if (!question.dependsOn) return true;
