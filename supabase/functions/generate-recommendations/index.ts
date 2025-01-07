@@ -9,12 +9,7 @@ const openAIApiKey = Deno.env.get('Open_AI_2');
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
-      headers: {
-        ...corsHeaders,
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      }
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
@@ -84,6 +79,25 @@ serve(async (req) => {
       );
     } catch (error) {
       console.error('Error generating recommendations:', error);
+      
+      // Check if it's a quota error and provide a specific error message
+      if (error.message?.includes('quota exceeded')) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'OpenAI API quota exceeded',
+            details: 'Please update the API key',
+            timestamp: new Date().toISOString(),
+          }),
+          { 
+            status: 429, 
+            headers: { 
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            } 
+          }
+        );
+      }
+      
       throw error;
     }
   } catch (error) {
