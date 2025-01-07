@@ -34,22 +34,13 @@ serve(async (req) => {
     const weightedAnswers = applyWeightedParameters(answers);
     console.log('Weighted answers:', weightedAnswers);
 
-    // Try with a single temperature first for faster response
+    // Generate the prompt
     const prompt = generatePrompt(weightedAnswers, existingActivities);
     console.log('Generated prompt:', prompt);
       
     try {
-      const gptData = await generateOpenAIResponse(openAIApiKey, prompt, 0.85);
-      console.log('Received GPT response:', gptData);
-      
-      if (!gptData.choices?.[0]?.message?.content) {
-        console.error('Invalid OpenAI response structure:', gptData);
-        throw new Error('Invalid OpenAI response structure');
-      }
-
-      const content = gptData.choices[0].message.content.trim();
-      console.log('Parsing OpenAI response:', content);
-      const recommendations = JSON.parse(content);
+      const recommendations = await generateOpenAIResponse(openAIApiKey, prompt, 0.85);
+      console.log('Received recommendations:', recommendations);
       
       // Use less strict validation for random activities
       if (answers.isRandom) {
@@ -79,25 +70,6 @@ serve(async (req) => {
       );
     } catch (error) {
       console.error('Error generating recommendations:', error);
-      
-      // Check if it's a quota error and provide a specific error message
-      if (error.message?.includes('quota exceeded')) {
-        return new Response(
-          JSON.stringify({ 
-            error: 'OpenAI API quota exceeded',
-            details: 'Please update the API key',
-            timestamp: new Date().toISOString(),
-          }),
-          { 
-            status: 429, 
-            headers: { 
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            } 
-          }
-        );
-      }
-      
       throw error;
     }
   } catch (error) {

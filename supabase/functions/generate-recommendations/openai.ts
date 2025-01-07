@@ -19,12 +19,12 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
         messages: [
           { 
             role: 'system', 
-            content: 'You are a JSON-only response generator specialized in activity recommendations. You must strictly follow all requirements provided and only return valid JSON objects that match the exact criteria specified. Be creative and unconventional while staying within safety guidelines.' 
+            content: 'You are a JSON-only response generator specialized in activity recommendations. Return ONLY valid JSON without any markdown formatting or additional text.' 
           },
           { role: 'user', content: prompt }
         ],
         temperature: temperature,
-        max_tokens: 1000, // Reduced from 2000 to improve response time
+        max_tokens: 1000,
         n: 1
       }),
       signal: controller.signal
@@ -45,7 +45,24 @@ export async function generateOpenAIResponse(openAIApiKey: string, prompt: strin
 
     const data = await response.json();
     console.log('Received response from OpenAI:', data);
-    return data;
+
+    // Extract the content and attempt to parse it
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error('Invalid OpenAI response structure');
+    }
+
+    // Remove any potential markdown formatting
+    const cleanContent = content.replace(/```json\n|\n```/g, '').trim();
+    
+    try {
+      // Attempt to parse the cleaned content
+      const parsedContent = JSON.parse(cleanContent);
+      return parsedContent;
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response:', cleanContent);
+      throw new Error('Failed to parse OpenAI response as JSON');
+    }
   } catch (error) {
     if (error.name === 'AbortError') {
       console.error('Request timed out');
