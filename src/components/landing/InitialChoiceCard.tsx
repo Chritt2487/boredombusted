@@ -21,10 +21,6 @@ export default function InitialChoiceCard({
       description: "Discover exciting new hobbies tailored to your interests"
     },
     {
-      value: "Do something near me",
-      description: "Explore activities and events in your area"
-    },
-    {
       value: "Learn a skill",
       description: "Master new skills with personalized learning paths"
     },
