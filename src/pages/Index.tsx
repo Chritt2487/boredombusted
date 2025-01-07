@@ -1,17 +1,19 @@
 import { useState } from "react";
 import Header from "@/components/landing/Header";
 import ContentContainer from "@/components/landing/ContentContainer";
+import { useApiStatus } from "@/hooks/useApiStatus";
 
 const Index = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
+  const isApiWorking = useApiStatus();
 
   const handleOptionSelect = (value: string) => {
     setSelectedOption(value);
   };
 
   const handleContinue = () => {
-    if (selectedOption) {
+    if (selectedOption && isApiWorking) {
       setShowForm(true);
     }
   };

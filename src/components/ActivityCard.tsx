@@ -1,12 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Tag, PlayCircle } from "lucide-react";
+import { PlayCircle } from "lucide-react";
 import ActivityImage from "./activity-card/ActivityImage";
 import ActivityDetails from "./activity-card/ActivityDetails";
 import ShareButton from "./activity-card/ShareButton";
-import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
-import { getTranslation, type Language } from "@/utils/i18n";
+import CategoryTags from "./activity-card/CategoryTags";
+import ActionButtons from "./activity-card/ActionButtons";
+import { useAffiliateId } from "@/hooks/useAffiliateId";
+import { useActivityCategories } from "@/hooks/useActivityCategories";
+import type { Language } from "@/utils/i18n";
 
 interface ActivityCardProps {
   activity: {
@@ -28,41 +30,8 @@ export default function ActivityCard({
   onSelect,
   language = 'en' 
 }: ActivityCardProps) {
-  const [affiliateId, setAffiliateId] = useState('default-tag');
-  const [categories, setCategories] = useState<string[]>([]);
-
-  useEffect(() => {
-    const getAffiliateId = async () => {
-      console.log('Fetching affiliate ID for activity:', activity.name);
-      const { data: { AMAZON_AFFILIATE_KEY } } = await supabase.functions.invoke('get-affiliate-key');
-      if (AMAZON_AFFILIATE_KEY) {
-        console.log('Successfully retrieved affiliate ID');
-        setAffiliateId(AMAZON_AFFILIATE_KEY);
-      }
-    };
-
-    const fetchCategories = async () => {
-      console.log('Fetching categories for activity:', activity.name);
-      const { data, error } = await supabase
-        .from('activity_categories')
-        .select('category')
-        .eq('activity_name', activity.name);
-      
-      if (error) {
-        console.error('Error fetching categories:', error);
-        return;
-      }
-
-      if (data) {
-        const categoryList = data.map(item => item.category);
-        console.log('Retrieved categories:', categoryList);
-        setCategories(categoryList);
-      }
-    };
-
-    getAffiliateId();
-    fetchCategories();
-  }, [activity.name]);
+  const affiliateId = useAffiliateId();
+  const categories = useActivityCategories(activity.name);
 
   const handleShopClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -113,19 +82,7 @@ export default function ActivityCard({
           <CardTitle className="text-xl text-[#7E69AB]">{activity.name}</CardTitle>
           <ShareButton activity={activity} />
         </div>
-        {categories.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {categories.map((category, index) => (
-              <div
-                key={index}
-                className="flex items-center bg-[#F1F0FB] px-2 py-1 rounded-full text-sm text-[#7E69AB]"
-              >
-                <Tag className="w-3 h-3 mr-1" />
-                {category}
-              </div>
-            ))}
-          </div>
-        )}
+        <CategoryTags categories={categories} />
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-gray-600">{activity.description}</p>
@@ -137,24 +94,12 @@ export default function ActivityCard({
           language={language}
         />
         
-        <div className="space-y-2">
-          <Button 
-            className="w-full bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200"
-            onClick={() => onSelect(activity)}
-            aria-label={`Learn more about ${activity.name}`}
-          >
-            {getTranslation('learnMore', language)}
-          </Button>
-          
-          <Button 
-            onClick={handleShopClick}
-            className="w-full bg-[#F97316] hover:bg-[#EA580C] transition-colors duration-200"
-            aria-label={`Shop for ${activity.name} on Amazon`}
-          >
-            <ShoppingBag className="mr-2 h-4 w-4" />
-            {getTranslation('shopOnAmazon', language)}
-          </Button>
-        </div>
+        <ActionButtons
+          activityName={activity.name}
+          onSelect={() => onSelect(activity)}
+          onShopClick={handleShopClick}
+          language={language}
+        />
       </CardContent>
     </Card>
   );
