@@ -39,57 +39,53 @@ serve(async (req) => {
     const weightedAnswers = applyWeightedParameters(answers);
     console.log('Weighted answers:', weightedAnswers);
 
-    // Generate multiple prompts with different temperatures
-    const temperatures = [0.7, 0.85, 1.0];
-    const allResponses: RecommendationsResponse[] = [];
-
-    for (const temperature of temperatures) {
-      const prompt = generatePrompt(weightedAnswers, existingActivities);
-      console.log(`Generating response with temperature ${temperature}`);
+    // Try with a single temperature first for faster response
+    const prompt = generatePrompt(weightedAnswers, existingActivities);
+    console.log('Generated prompt:', prompt);
       
-      try {
-        const gptData = await generateOpenAIResponse(openAIApiKey, prompt, temperature);
-        console.log(`Received GPT response for temperature ${temperature}:`, gptData);
-        
-        if (!gptData.choices?.[0]?.message?.content) {
-          console.error('Invalid OpenAI response structure:', gptData);
-          continue;
+    try {
+      const gptData = await generateOpenAIResponse(openAIApiKey, prompt, 0.85);
+      console.log('Received GPT response:', gptData);
+      
+      if (!gptData.choices?.[0]?.message?.content) {
+        console.error('Invalid OpenAI response structure:', gptData);
+        throw new Error('Invalid OpenAI response structure');
+      }
+
+      const content = gptData.choices[0].message.content.trim();
+      console.log('Parsing OpenAI response:', content);
+      const recommendations = JSON.parse(content);
+      
+      // Use less strict validation for random activities
+      if (answers.isRandom) {
+        console.log('Using less strict validation for random activities');
+        if (!Array.isArray(recommendations.activities)) {
+          throw new Error('Response missing activities array');
         }
-
-        const content = gptData.choices[0].message.content.trim();
-        console.log('Parsing OpenAI response:', content);
-        const recommendations = JSON.parse(content);
+      } else {
         validateActivities(recommendations.activities);
-        allResponses.push(recommendations);
-      } catch (error) {
-        console.error(`Error with temperature ${temperature}:`, error);
-        continue;
       }
+
+      // Add placeholder images
+      const activitiesWithImages = recommendations.activities.map(activity => ({
+        ...activity,
+        imageUrl: '/placeholder.svg',
+      }));
+
+      console.log('Sending successful response with activities:', activitiesWithImages);
+      return new Response(
+        JSON.stringify({ activities: activitiesWithImages }),
+        { 
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          } 
+        }
+      );
+    } catch (error) {
+      console.error('Error generating recommendations:', error);
+      throw error;
     }
-
-    if (allResponses.length === 0) {
-      throw new Error('Failed to generate valid recommendations with any temperature');
-    }
-
-    // Randomly select activities from all valid responses
-    const selectedResponse = allResponses[Math.floor(Math.random() * allResponses.length)];
-    
-    // Add placeholder images
-    const activitiesWithImages = selectedResponse.activities.map(activity => ({
-      ...activity,
-      imageUrl: '/placeholder.svg',
-    }));
-
-    console.log('Sending successful response with activities:', activitiesWithImages);
-    return new Response(
-      JSON.stringify({ activities: activitiesWithImages }),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        } 
-      }
-    );
   } catch (error) {
     console.error('Error in generate-recommendations:', error);
     return new Response(
@@ -99,7 +95,7 @@ serve(async (req) => {
         timestamp: new Date().toISOString(),
       }),
       { 
-        status: error.status || 500, 
+        status: 500, 
         headers: { 
           ...corsHeaders,
           'Content-Type': 'application/json',
