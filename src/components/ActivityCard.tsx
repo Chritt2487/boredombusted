@@ -36,7 +36,8 @@ export default function ActivityCard({
   const handleShopClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log('Opening Amazon search for:', activity.name);
-    const amazonSearchUrl = `https://www.amazon.com/s?k=${encodeURIComponent(activity.name)}&tag=${affiliateId}`;
+    // Update to use the new link structure with bbapp-20 store ID
+    const amazonSearchUrl = `https://www.amazon.com/s?k=${encodeURIComponent(activity.name)}&tag=bbapp-20`;
     window.open(amazonSearchUrl, '_blank');
   };
 

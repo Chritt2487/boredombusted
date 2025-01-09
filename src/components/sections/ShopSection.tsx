@@ -1,28 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
 
 interface ShopSectionProps {
   activityName: string;
 }
 
 export default function ShopSection({ activityName }: ShopSectionProps) {
-  const [affiliateId, setAffiliateId] = useState('default-tag');
-
-  useEffect(() => {
-    const getAffiliateId = async () => {
-      const { data: { AMAZON_AFFILIATE_KEY } } = await supabase.functions.invoke('get-affiliate-key');
-      if (AMAZON_AFFILIATE_KEY) {
-        setAffiliateId(AMAZON_AFFILIATE_KEY);
-      }
-    };
-
-    getAffiliateId();
-  }, []);
-
-  const amazonSearchUrl = `https://www.amazon.com/s?k=${encodeURIComponent(activityName)}&tag=${affiliateId}`;
+  const amazonSearchUrl = `https://www.amazon.com/s?k=${encodeURIComponent(activityName)}&tag=bbapp-20`;
   
   return (
     <Card className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm">
