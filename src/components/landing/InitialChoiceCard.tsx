@@ -41,10 +41,10 @@ export default function InitialChoiceCard({
   return (
     <Card className="w-full border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm animate-fade-in">
       <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl md:text-3xl text-center text-[#7E69AB] font-bold">
+        <CardTitle className="text-3xl md:text-4xl text-center text-[#7E69AB] font-bold">
           What are you looking to do?
         </CardTitle>
-        <p className="text-lg text-center text-gray-600 font-medium">
+        <p className="text-xl text-center text-gray-600 font-medium">
           Choose an option below and we'll help you find the perfect match
         </p>
       </CardHeader>
@@ -63,18 +63,18 @@ export default function InitialChoiceCard({
               <div className="flex-grow">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value={option.value} id={option.value} />
-                  <Label htmlFor={option.value} className="cursor-pointer text-lg font-semibold">
+                  <Label htmlFor={option.value} className="cursor-pointer text-xl font-semibold">
                     {option.value}
                   </Label>
                 </div>
-                <p className="text-base text-gray-600 mt-1 font-medium">{option.description}</p>
+                <p className="text-lg text-gray-600 mt-1 font-medium">{option.description}</p>
               </div>
             </div>
           ))}
         </RadioGroup>
         <Button
           onClick={onContinue}
-          className="w-full mt-6 bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200 text-lg font-semibold py-6"
+          className="w-full mt-6 bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors duration-200 text-xl font-semibold py-6"
           disabled={!selectedOption}
         >
           Continue
