@@ -5,8 +5,7 @@ export default function Header() {
     <div className="text-center space-y-4 mb-8 animate-fade-in">
       <h1 className="text-5xl font-bold" style={{ 
         color: '#c3502d',
-        WebkitTextStroke: '1px black',
-        textStroke: '1px black'
+        WebkitTextStroke: '1px black'
       }}>
         Bust Your Boredom!
       </h1>
