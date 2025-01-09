@@ -1,12 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { PlayCircle } from "lucide-react";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ActivityImage from "./activity-card/ActivityImage";
 import ActivityDetails from "./activity-card/ActivityDetails";
 import ShareButton from "./activity-card/ShareButton";
 import CategoryTags from "./activity-card/CategoryTags";
 import ActionButtons from "./activity-card/ActionButtons";
-import { useAffiliateId } from "@/hooks/useAffiliateId";
+import CardContainer from "./activity-card/CardContainer";
+import VideoButton from "./activity-card/VideoButton";
 import { useActivityCategories } from "@/hooks/useActivityCategories";
 import type { Language } from "@/utils/i18n";
 
@@ -30,13 +29,11 @@ export default function ActivityCard({
   onSelect,
   language = 'en' 
 }: ActivityCardProps) {
-  const affiliateId = useAffiliateId();
   const categories = useActivityCategories(activity.name);
 
   const handleShopClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log('Opening Amazon search for:', activity.name);
-    // Update to use the new link structure with bbapp-20 store ID
     const amazonSearchUrl = `https://www.amazon.com/s?k=${encodeURIComponent(activity.name)}&tag=bbapp-20`;
     window.open(amazonSearchUrl, '_blank');
   };
@@ -56,28 +53,15 @@ export default function ActivityCard({
   };
 
   return (
-    <Card 
-      className="border-2 border-[#D6BCFA] bg-white/80 backdrop-blur-sm hover:shadow-lg transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-[#7E69AB] focus-visible:outline-none"
-      role="article"
-      aria-label={`Activity card for ${activity.name}`}
-      tabIndex={0}
-      onKeyDown={handleKeyPress}
-      onClick={() => onSelect(activity)}
+    <CardContainer 
+      onSelect={() => onSelect(activity)}
+      onKeyPress={handleKeyPress}
+      activityName={activity.name}
     >
       <CardHeader>
         <div className="w-full h-48 rounded-lg overflow-hidden mb-4 relative">
           <ActivityImage name={activity.name} imageUrl={activity.imageUrl} />
-          {activity.videoUrl && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute bottom-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full"
-              onClick={handleVideoClick}
-              aria-label="Watch tutorial video"
-            >
-              <PlayCircle className="h-6 w-6" />
-            </Button>
-          )}
+          {activity.videoUrl && <VideoButton onClick={handleVideoClick} />}
         </div>
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl text-[#7E69AB]">{activity.name}</CardTitle>
@@ -102,6 +86,6 @@ export default function ActivityCard({
           language={language}
         />
       </CardContent>
-    </Card>
+    </CardContainer>
   );
 }
